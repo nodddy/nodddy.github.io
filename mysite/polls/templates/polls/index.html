@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>index file</title>
+</head>
+<body>
+Latest Experiments:
+{% if latest_experiment_list %}
+    <ul>
+    {% for experiment in latest_experiment_list %}
+        <li><a href="{%url 'polls:detail' experiment.id%}">{{ experiment.experiment_name }} ({{ experiment.date}}) </a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No experiments are available.</p>
+{% endif %}
+
+<button>
+Add New Experiment
+</button>
+</body>
+</html>
