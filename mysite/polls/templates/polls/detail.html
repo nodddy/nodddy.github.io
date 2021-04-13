@@ -1,38 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Experiment Details</title>
-</head>
-<body>
-<h1>{{ experiment.experiment_name }}</h1>
-Experiment Parameters:
+{%extends 'base.html'%}
+
+{% block content %}
+
+<h2> Experiment Parameters: </h2>
     <ul>
     {% for parameter in experiment.parameter_set.all %}
-        <li> {{ parameter.parameter_name }}
-            ( {{ parameter.parameter_value }} {{ parameter.parameter_unit }} )
+        <li> {{ parameter.name }} --
+             {{ parameter.value }} {{ parameter.unit }}
             <button> Change Parameter </button>
             <button> Delete Parameter </button>
+
         </li>
     {% endfor %}
-    </ul>
-Experiment Observations/Comments:
-    <ul>
-    {% for observation in experiment.obeservation_set.all %}
-        <li> {{ observation.observation_text }}
-        </li>
-    {% endfor %}
+
+    {% if not block_add %}
+    <form action="{% url 'polls:add_parameter' experiment.id 'parameter' %}" method="post">
+        {% csrf_token %}
+        <input type="submit" value="Add Parameter">
+    </form>
+    {% endif %}
+
+    {% block parameter %}
+    {% endblock %}
     </ul>
 
-Experiment Notes:
+
+<h2> Experiment Procedure: </h2>
+    <ol>
+    {% for step in experiment.step_set.all %}
+        <li> {{ step.text }}
+            <ul>
+            {% for stepexperiment in step.stepexperiment_set.all %}
+                {% for parameter in stepexperiment.stepparameter_set.all %}
+                 <li> {{ stepexperiment.name }} ({{ parameter.name }} = {{ parameter.value }} {{ parameter.unit }}) </li>
+                {% endfor %}
+            {% endfor %}
+            </ul>
+        </li>
+    {% endfor %}
+
+    {% if not block_add %}
+    <form action="{% url 'polls:add_data_to_model' experiment.id 'step' %}" method="post">
+        {% csrf_token %}
+        <input type="submit" value="Add Step">
+    </form>
+    {% endif %}
+
+    {% block step %}
+    {% endblock %}
+</ol>
+
+
+<h2> Experiment Notes: </h2>
     <ul>
     {% for note in experiment.note_set.all %}
-        <li> {{ note.note_text }}
+        <li> {{ note.text }}
         </li>
     {% endfor %}
-    </ul>
 
+    {% if not block_add %}
+    <form action="{% url 'polls:add_note' experiment.id 'note' %}" method="post">
+        {% csrf_token %}
+        <input type="submit" value="Add Note">
+    </form>
+    {% endif %}
 
-
-</body>
-</html>
+    {% block note %}
+    {% endblock %}
+</ul>
+{% endblock %}

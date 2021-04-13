@@ -55,7 +55,7 @@ ROOT_URLCONF = 'mysite.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['C:/Users/Marius/Documents/GitHub/nodddy.github.io/mysite/polls/templates/polls'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

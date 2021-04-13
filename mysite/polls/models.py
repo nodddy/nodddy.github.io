@@ -2,42 +2,64 @@ from django.db import models
 
 
 class Experiment(models.Model):
-    experiment_name = models.CharField(max_length=200)
-    date = models.DateTimeField('Date of experiment')
+    name = models.CharField(max_length=200)
+    date = models.DateTimeField('Date of experiment', blank=True, null=True)
+    sample = models.CharField(max_length=200, blank=True, null=True)
 
     def __str__(self):
-        return self.experiment_name
+        return self.name
 
 
 class Parameter(models.Model):
     experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
-    parameter_name = models.CharField(max_length=200)
-    parameter_value = models.FloatField(default=None)
-    parameter_unit = models.CharField(max_length=200)
+    name = models.CharField(max_length=200)
+    value = models.FloatField(default=None)
+    unit = models.CharField(max_length=200)
 
     def __str__(self):
-        return self.parameter_name
-
-
-class Observation(models.Model):
-    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
-    observation_image = models.ImageField
-    observation_text = models.CharField(max_length=400)
+        return self.name
 
 
 class Note(models.Model):
     experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
-    note_text = models.CharField(max_length=400)
+    text = models.CharField(max_length=400)
 
 
 class Data(models.Model):
     experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
-    data_name = models.CharField(max_length=200)
-    data_type = models.CharField(max_length=200)
-    data_file = models.FileField
-    data_file_name = models.CharField(max_length=200)
-    data_file_type = models.CharField(max_length=200)
-    data_file_delimiter = models.CharField(max_length=200)
+    name = models.CharField(max_length=200)
+    type = models.CharField(max_length=200)
+    file = models.FileField
+    file_name = models.CharField(max_length=200)
+    file_type = models.CharField(max_length=200)
+    file_delimiter = models.CharField(max_length=200)
 
     def __str__(self):
-        return self.data_name
+        return self.name
+
+
+class Step(models.Model):
+    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
+    note = models.CharField(max_length=200, blank=True)
+    text = models.CharField(max_length=200)
+
+    def __str__(self):
+        return f'{self.experiment.name}.{self.text}'
+
+
+class StepExperiment(models.Model):
+    step = models.ForeignKey(Step, on_delete=models.CASCADE)
+    name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
+
+
+class StepParameter(models.Model):
+    stepexperiment = models.ForeignKey(StepExperiment, on_delete=models.CASCADE)
+    name = models.CharField(max_length=200)
+    value = models.FloatField(default=None)
+    unit = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
