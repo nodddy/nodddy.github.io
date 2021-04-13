@@ -1,0 +1,43 @@
+{%extends 'polls/detail.html'%}
+
+{% block parameter %}
+{% if form_id == 'parameter_form' %}
+    <form   method="POST">
+        {% csrf_token %}
+        {{ form }}
+        <button type="Submit" name="Submit" value="Accept"> Accept</button>
+    </form>
+    <form   method="POST">
+        {% csrf_token %}
+        <button type="Submit" name="Abort" value="Abort"> Abort </button>
+    </form>
+{% endif %}
+{% endblock %}
+
+{% block note %}
+{% if form_id == 'note_form' %}
+    <form   method="POST">
+        {% csrf_token %}
+        {{ form }}
+        <button type="Submit" name="Submit" value="Accept"> Accept</button>
+    </form>
+    <form   method="POST">
+        {% csrf_token %}
+        <button type="Submit" name="Abort" value="Abort"> Abort </button>
+    </form>
+{% endif %}
+{% endblock %}
+
+{% block step %}
+{% if form_id == 'step_form' %}
+    <form   method="POST">
+        {% csrf_token %}
+        {{ form }}
+        <button type="Submit" name="Submit" value="Accept"> Accept</button>
+    </form>
+    <form   method="POST">
+        {% csrf_token %}
+        <button type="Submit" name="Abort" value="Abort"> Abort </button>
+    </form>
+{% endif %}
+{% endblock %}

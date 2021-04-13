@@ -1,0 +1,8 @@
+{% extends 'polls/detail.html'%}
+
+{% block delete %}
+    <form  action="{% url 'polls:delete' '' %}" method="POST">
+        {% csrf_token %}
+        <button type="Submit" name="Submit" value="Delete"> Accept</button>
+    </form>
+{% endblock %}
