@@ -1,16 +1,18 @@
-{%extends 'polls/index.html'%}
-
-{% block experiment_add %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>index file</title>
+</head>
+<body>
     <form   method="POST">
         {% csrf_token %}
-        {{ form }}
+        {{ form.as_p }}
         <button type="Submit" name="Submit" value="Accept"> Save</button>
     </form>
-    <form   method="POST">
-        {% csrf_token %}
-        <button type="Submit" name="Abort" value="Abort"> Cancel </button>
-    </form>
-{% endblock %}
+    <input type=button value="Cancel" onClick="javascript:history.go(-1);">
+</body>
+</html>
 
 
 

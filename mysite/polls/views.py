@@ -14,12 +14,52 @@ def index(request):
     return render(request, 'polls/index.html', context)
 
 
+class ExperimentCreateView(generic.CreateView):
+    template_name = 'polls/add_experiment.html'
+    form_class = ExperimentForm
+
+
+class ExperimentUpdateView(generic.UpdateView):
+    template_name = 'polls/add_experiment.html'
+    form_class = ExperimentForm
+
+    def get_object(self):
+        id_ = self.kwargs.get('experiment_id')
+        print(id_)
+        return get_object_or_404(Experiment, id=id_)
+
+    def get_initial(self):
+        """initialize your's form values here"""
+
+        print(super().get_initial())
+
+        return super(ExperimentUpdateView, self).get_initial()
+
+class ExperimentDetailView(generic.DetailView):
+    template_name = 'polls/detail.html'
+
+    def get_object(self):
+        id_ = self.kwargs.get('experiment_id')
+        return get_object_or_404(Experiment, id=id_)
+
+
+class ExperimentDetailCreateView(generic.CreateView):
+    template_name = 'polls/add.html'
+    form_dict = {
+        'step_form': StepForm,
+        'note_form': NoteForm,
+        'parameter_form': ParameterForm
+    }
+
+    def get_form_id(self):
+        return self.kwargs.get('form_id')
+
+
 def detail(request, experiment_id):
     experiment = get_object_or_404(Experiment, pk=experiment_id)
     context = {
         'experiment': experiment,
     }
-
     return render(request, 'polls/detail.html', context)
 
 

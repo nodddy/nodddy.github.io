@@ -1,8 +1,15 @@
 {%extends 'polls/base.html'%}
 
 {% block content %}
+Created: {{ experiment.date }}
+Sample: {{ experiment.sample }}
+<form action="{% url 'polls:update_experiment' experiment.id %}" method="post">
+    {% csrf_token %}
+    <input type="submit" value="Update Experiment">
+</form>
 
 <h2> Experiment Parameters: </h2>
+
 <ul>
     {% for parameter in experiment.parameter_set.all %}
     <li>

@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 
 class Experiment(models.Model):
@@ -8,6 +9,9 @@ class Experiment(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('polls:detail', kwargs={'experiment_id': self.id})
 
 
 class Parameter(models.Model):
@@ -20,9 +24,11 @@ class Parameter(models.Model):
         return self.name
 
 
+
 class Note(models.Model):
     experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
     text = models.CharField(max_length=400)
+
 
 
 class Data(models.Model):
@@ -38,6 +44,7 @@ class Data(models.Model):
         return self.name
 
 
+
 class Step(models.Model):
     experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
     note = models.CharField(max_length=200, blank=True)
@@ -45,6 +52,8 @@ class Step(models.Model):
 
     def __str__(self):
         return f'{self.experiment.name}.{self.text}'
+
+
 
 
 class StepExperiment(models.Model):
@@ -55,6 +64,7 @@ class StepExperiment(models.Model):
         return self.name
 
 
+
 class StepParameter(models.Model):
     stepexperiment = models.ForeignKey(StepExperiment, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
@@ -63,3 +73,5 @@ class StepParameter(models.Model):
 
     def __str__(self):
         return self.name
+
+

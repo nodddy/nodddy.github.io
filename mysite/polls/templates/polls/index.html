@@ -8,23 +8,18 @@
 <h1> Latest Experiments: </h1>
 {% if experiment_list %}
     <ul>
-    {% for experiment in experiment_list %}
-        <li><a href="{%url 'polls:detail' experiment.id%}">{{ experiment.name }} ({{ experiment.date}}) </a></li>
-    {% endfor %}
+        {% for experiment in experiment_list %}
+            <li><a href="{%url 'polls:detail' experiment.id%}">{{ experiment.name }} ({{ experiment.date}}) </a></li>
+        {% endfor %}
     </ul>
 {% else %}
     <p>No experiments are available.</p>
 {% endif %}
 
-    {% if not block_add %}
-    <form action="{% url 'polls:add_experiment' %}" method="post">
-        {% csrf_token %}
-        <input type="submit" value="New Experiment">
-    </form>
-    {% endif %}
-
-{% block experiment_add %}
-{% endblock %}
+<form action="{% url 'polls:add_experiment' %}" method="post">
+    {% csrf_token %}
+    <input type="submit" value="New Experiment">
+</form>
 
 
 </body>
