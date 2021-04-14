@@ -3,17 +3,15 @@ from django.views import generic
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
-from .forms import ParameterForm, NoteForm, StepForm
+from .forms import ExperimentForm, ParameterForm, NoteForm, StepForm
 from .models import Parameter, Experiment
 
 
-class IndexView(generic.ListView):
-    template_name = 'polls/index.html'
-    context_object_name = 'latest_experiment_list'
-
-    def get_queryset(self):
-        """Return experiments based on latest by time"""
-        return Experiment.objects.order_by('-date')
+def index(request):
+    context = {
+        'experiment_list': Experiment.objects.order_by('-date'),
+    }
+    return render(request, 'polls/index.html', context)
 
 
 def detail(request, experiment_id):
@@ -23,6 +21,15 @@ def detail(request, experiment_id):
     }
 
     return render(request, 'polls/detail.html', context)
+
+
+def add_experiment(request):
+    form = ExperimentForm(request.POST)
+    if form.is_valid():
+        form.save()
+    return render(request, 'polls/add_experiment.html', {'block_add': True,
+                                                         'form': form,
+                                                         'experiment_list': Experiment.objects.order_by('-date')})
 
 
 def add(request, experiment_id, form_id=''):
@@ -46,11 +53,9 @@ def add(request, experiment_id, form_id=''):
                                               'block_add': True})
 
 
-def delete(request, experiment_id, form_id):
-    print(form_id)
-    pk = form_id
+def delete(request, experiment_id, model_id, entry_id):
     experiment = get_object_or_404(Experiment, pk=experiment_id)
     if request.method == 'POST' and 'delete' in request.POST:
-        pass
-    # experiment.object.filter().delete()
+        model_set = getattr(experiment, f'{model_id}_set')
+        model_set.get(id=entry_id).delete()
     return HttpResponseRedirect(reverse('polls:detail', args=(experiment.id,)))

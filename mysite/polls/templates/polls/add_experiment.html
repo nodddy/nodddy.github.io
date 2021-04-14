@@ -1,0 +1,17 @@
+{%extends 'polls/index.html'%}
+
+{% block experiment_add %}
+    <form   method="POST">
+        {% csrf_token %}
+        {{ form }}
+        <button type="Submit" name="Submit" value="Accept"> Save</button>
+    </form>
+    <form   method="POST">
+        {% csrf_token %}
+        <button type="Submit" name="Abort" value="Abort"> Cancel </button>
+    </form>
+{% endblock %}
+
+
+
+

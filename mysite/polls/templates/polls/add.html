@@ -1,43 +1,45 @@
 {%extends 'polls/detail.html'%}
 
-{% block parameter %}
+{% block parameter_add %}
 {% if form_id == 'parameter_form' %}
     <form   method="POST">
         {% csrf_token %}
         {{ form }}
-        <button type="Submit" name="Submit" value="Accept"> Accept</button>
+        <button type="Submit" name="Submit" value="Accept"> Save</button>
     </form>
     <form   method="POST">
         {% csrf_token %}
-        <button type="Submit" name="Abort" value="Abort"> Abort </button>
+        <button type="Submit" name="Abort" value="Abort"> Cancel </button>
     </form>
 {% endif %}
 {% endblock %}
 
-{% block note %}
+{% block note_add %}
 {% if form_id == 'note_form' %}
     <form   method="POST">
         {% csrf_token %}
         {{ form }}
-        <button type="Submit" name="Submit" value="Accept"> Accept</button>
+        <button type="Submit" name="Submit" value="Accept"> Save</button>
     </form>
     <form   method="POST">
         {% csrf_token %}
-        <button type="Submit" name="Abort" value="Abort"> Abort </button>
+        <button type="Submit" name="Abort" value="Abort"> Cancel </button>
     </form>
 {% endif %}
 {% endblock %}
 
-{% block step %}
+{% block step_add %}
 {% if form_id == 'step_form' %}
     <form   method="POST">
         {% csrf_token %}
         {{ form }}
-        <button type="Submit" name="Submit" value="Accept"> Accept</button>
+        <button type="Submit" name="Submit" value="Accept"> Save</button>
     </form>
     <form   method="POST">
         {% csrf_token %}
-        <button type="Submit" name="Abort" value="Abort"> Abort </button>
+        <button type="Submit" name="Abort" value="Abort"> Cancel </button>
     </form>
 {% endif %}
 {% endblock %}
+
+

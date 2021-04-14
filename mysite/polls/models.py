@@ -3,7 +3,7 @@ from django.db import models
 
 class Experiment(models.Model):
     name = models.CharField(max_length=200)
-    date = models.DateTimeField('Date of experiment', blank=True, null=True)
+    date = models.DateField('Date of experiment', blank=True, null=True)
     sample = models.CharField(max_length=200, blank=True, null=True)
 
     def __str__(self):

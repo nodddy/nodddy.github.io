@@ -9,10 +9,10 @@
         {{ parameter.value }} {{ parameter.unit }}
         <button> Change Parameter</button>
 
-        <form  action="{% url 'polls:delete' experiment.id parameter.id %}" method="POST">
-        {% csrf_token %}
-        <button type="Submit" name="Submit" value="Delete"> Delete </button>
-    </form>
+        <form  action="{% url 'polls:delete' experiment.id 'parameter' parameter.id %}" method="POST">
+            {% csrf_token %}
+            <button type="Submit" name="delete" value="delete"> Delete </button>
+        </form>
 
     </li>
     {% endfor %}
@@ -24,7 +24,7 @@
     </form>
     {% endif %}
 
-    {% block parameter %}
+    {% block parameter_add %}
     {% endblock %}
 </ul>
 
@@ -32,11 +32,16 @@
 <h2> Experiment Procedure: </h2>
 <ol>
     {% for step in experiment.step_set.all %}
-    <li> {{ step.text }}
+    <li> {{ step.text }} {% if step.note != '' %} ({{ step.note }}) {% endif %}
+        <form  action="{% url 'polls:delete' experiment.id 'step' step.id %}" method="POST">
+            {% csrf_token %}
+            <button type="Submit" name="delete" value="delete"> Delete </button>
+        </form>
         <ul>
             {% for stepexperiment in step.stepexperiment_set.all %}
             {% for parameter in stepexperiment.stepparameter_set.all %}
-            <li> {{ stepexperiment.name }} ({{ parameter.name }} = {{ parameter.value }} {{ parameter.unit }})</li>
+            <li> {{ stepexperiment.name }} ({{ parameter.name }} = {{ parameter.value }} {{ parameter.unit }})
+            </li>
             {% endfor %}
             {% endfor %}
         </ul>
@@ -50,7 +55,7 @@
     </form>
     {% endif %}
 
-    {% block step %}
+    {% block step_add %}
     {% endblock %}
 </ol>
 
@@ -59,6 +64,10 @@
 <ul>
     {% for note in experiment.note_set.all %}
     <li> {{ note.text }}
+        <form  action="{% url 'polls:delete' experiment.id 'note' note.id %}" method="POST">
+            {% csrf_token %}
+            <button type="Submit" name="delete" value="delete"> Delete </button>
+        </form>
     </li>
     {% endfor %}
 
@@ -69,7 +78,7 @@
     </form>
     {% endif %}
 
-    {% block note %}
+    {% block note_add %}
     {% endblock %}
 </ul>
 {% endblock %}
