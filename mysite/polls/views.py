@@ -27,7 +27,7 @@ def add_experiment(request):
     form = ExperimentForm(request.POST)
     if form.is_valid():
         form.save()
-    return render(request, 'polls/add_experiment.html', {'block_add': True,
+    return render(request, 'polls/add_experiment.html', {'block_buttons': True,
                                                          'form': form,
                                                          'experiment_list': Experiment.objects.order_by('-date')})
 
@@ -39,7 +39,7 @@ def add(request, experiment_id, form_id=''):
         'note_form': NoteForm,
         'parameter_form': ParameterForm
     }
-    form = form_dict[form_id](request.POST)
+    form = form_dict[form_id](request.POST or None)
     if 'Abort' in request.POST.keys():
         return HttpResponseRedirect(reverse('polls:detail', args=(experiment.id,)))
     if form.is_valid():
@@ -50,7 +50,7 @@ def add(request, experiment_id, form_id=''):
     return render(request, 'polls/add.html', {'form_id': form_id,
                                               'form': form,
                                               'experiment': experiment,
-                                              'block_add': True})
+                                              'block_buttons': True})
 
 
 def delete(request, experiment_id, model_id, entry_id):
@@ -59,3 +59,27 @@ def delete(request, experiment_id, model_id, entry_id):
         model_set = getattr(experiment, f'{model_id}_set')
         model_set.get(id=entry_id).delete()
     return HttpResponseRedirect(reverse('polls:detail', args=(experiment.id,)))
+
+
+def change(request, experiment_id, model_id, entry_id, form_id):
+    experiment = get_object_or_404(Experiment, pk=experiment_id)
+    form_dict = {
+        'step_form': StepForm,
+        'note_form': NoteForm,
+        'parameter_form': ParameterForm
+    }
+    if 'Abort' in request.POST.keys():
+        return HttpResponseRedirect(reverse('polls:detail', args=(experiment.id,)))
+
+    model_set = getattr(experiment, f'{model_id}_set')
+    entry_instance = model_set.get(id=entry_id)
+    form = form_dict[form_id](request.POST, instance=entry_instance)
+    if form.is_valid():
+        form.save()
+        return HttpResponseRedirect(reverse('polls:detail', args=(experiment.id,)))
+    form = form_dict[form_id](instance=entry_instance)
+    return render(request, 'polls/change.html', {
+        'experiment': experiment,
+        'form': form,
+        'entry_id': entry_id,
+        'block_buttons': True, })

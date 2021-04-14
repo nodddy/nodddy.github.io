@@ -5,19 +5,29 @@
 <h2> Experiment Parameters: </h2>
 <ul>
     {% for parameter in experiment.parameter_set.all %}
-    <li> {{ parameter.name }} --
+    <li>
+        {% if entry_id == parameter.id %}
+        {% block change %}
+        {% endblock %}
+        {% else %}
+        {{ parameter.name }} --{{parameter.id}}
         {{ parameter.value }} {{ parameter.unit }}
-        <button> Change Parameter</button>
+        {% if not block_buttons %}
+        <form  action="{% url 'polls:change' experiment.id 'parameter' parameter.id 'parameter_form' %}" method="POST">
+            {% csrf_token %}
+            <button type="Submit" name="change" value="change"> Edit </button>
+        </form>
 
-        <form  action="{% url 'polls:delete' experiment.id 'parameter' parameter.id %}" method="POST">
+        <form  action="{% url 'polls:delete' experiment.id 'parameter' parameter.id  %}" method="POST">
             {% csrf_token %}
             <button type="Submit" name="delete" value="delete"> Delete </button>
         </form>
-
+        {% endif %}
+        {% endif %}
     </li>
     {% endfor %}
 
-    {% if not block_add %}
+    {% if not block_buttons %}
     <form action="{% url 'polls:add' experiment.id 'parameter_form' %}" method="post">
         {% csrf_token %}
         <input type="submit" value="Add Parameter">
@@ -33,10 +43,12 @@
 <ol>
     {% for step in experiment.step_set.all %}
     <li> {{ step.text }} {% if step.note != '' %} ({{ step.note }}) {% endif %}
+        {% if not block_buttons %}
         <form  action="{% url 'polls:delete' experiment.id 'step' step.id %}" method="POST">
             {% csrf_token %}
             <button type="Submit" name="delete" value="delete"> Delete </button>
         </form>
+        {% endif %}
         <ul>
             {% for stepexperiment in step.stepexperiment_set.all %}
             {% for parameter in stepexperiment.stepparameter_set.all %}
@@ -48,7 +60,7 @@
     </li>
     {% endfor %}
 
-    {% if not block_add %}
+    {% if not block_buttons %}
     <form action="{% url 'polls:add' experiment.id 'step_form' %}" method="post">
         {% csrf_token %}
         <input type="submit" value="Add Step">
@@ -64,14 +76,16 @@
 <ul>
     {% for note in experiment.note_set.all %}
     <li> {{ note.text }}
+        {% if not block_buttons %}
         <form  action="{% url 'polls:delete' experiment.id 'note' note.id %}" method="POST">
             {% csrf_token %}
             <button type="Submit" name="delete" value="delete"> Delete </button>
         </form>
+        {% endif %}
     </li>
     {% endfor %}
 
-    {% if not block_add %}
+    {% if not block_buttons %}
     <form action="{% url 'polls:add' experiment.id 'note_form' %}" method="post">
         {% csrf_token %}
         <input type="submit" value="Add Note">
