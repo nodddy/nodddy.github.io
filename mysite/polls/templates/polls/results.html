@@ -25,8 +25,14 @@
             {{ form.value }}
             {{ form.unit.label_tag }}
             {{ form.unit }}
+
+            <input type="submit" label="delete" value="Delete" name="btn_delete-parameter.{{ forloop.counter }}">
+
+            {% endfor %}
+
+            <input type="submit" value="Add Row" name="add_parameter_btn">
+
         </div>
-        {% endfor %}
 
 
         <h2> Experiment Procedure </h2>
@@ -44,9 +50,11 @@
                     {{ form.note.errors }}
                     {{ form.note.label_tag }}
                     {{ form.note }}
+                    {% endfor %}
+                    <input type="submit" value="Add Row" name="add_step_btn">
                 </li>
             </div>
-            {% endfor %}
+
         </ol>
 
         <h2> Experiment Procedure </h2>
@@ -58,8 +66,10 @@
             {{ form.text.errors }}
             {{ form.text.label_tag }}
             {{ form.text }}
+            {% endfor %}
+            <input type="submit" value="Add Row" name="add_note_btn">
         </div>
-        {% endfor %}
+
 
         <input type="submit" value="Save Changes" class="submit"/>
     </form>

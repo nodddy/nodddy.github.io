@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
 from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 
 from .forms import ExperimentForm, ParameterFormSet, ParameterForm, NoteForm, NoteFormSet, StepForm, StepFormSet
 from .models import Parameter, Experiment
@@ -19,20 +19,11 @@ class ExperimentCreateView(generic.CreateView):
     form_class = ExperimentForm
 
 
-class ExperimentUpdateView(generic.UpdateView):
-    template_name = 'polls/add_experiment.html'
-    form_class = ExperimentForm
-    model = Experiment
-
-    def get_object(self):
-        id_ = self.kwargs.get('experiment_id')
-        return get_object_or_404(Experiment, id=id_)
-
-
 class ParameterUpdateView(generic.UpdateView):
     template_name = 'polls/results.html'
     form_class = ExperimentForm
     model = Experiment
+    success_url = ''
 
     def get(self, request, *args, **kwargs):
         """
@@ -62,13 +53,47 @@ class ParameterUpdateView(generic.UpdateView):
         formsets with the passed POST variables and then checking them for
         validity.
         """
+
+        def delete_entry(request, form_instance):
+            delete_entry_list = [key for key in request.POST.keys() if 'btn_delete' in key]
+            if len(delete_entry_list) != 0:
+                print(delete_entry_list)
+                model_name, entry_id_from_form = delete_entry_list[0].split('-')[-1].split('.')
+
+                entry_id_list = [item.pk for item in Parameter.objects.filter(experiment=form_instance).all()]
+                try:
+                    entry_id = entry_id_list[int(entry_id_from_form) - 1]
+                    entry = Parameter.objects.get(experiment=form_instance, id=entry_id)
+                    entry.delete()
+                    return True
+                except IndexError:
+                    return True
+
+
+
         form_class = self.get_form_class()
         form = self.get_form(form_class)
-        form_instance=get_object_or_404(Experiment, id=self.kwargs['experiment_id'])
+        form_instance = get_object_or_404(Experiment, id=self.kwargs['experiment_id'])
         form.instance = form_instance
         parameter_form = ParameterFormSet(self.request.POST, instance=form_instance)
         step_form = StepFormSet(self.request.POST, instance=form_instance)
         note_form = NoteFormSet(self.request.POST, instance=form_instance)
+        delete_entry_list = [key for key in request.POST.keys() if 'btn_delete' in key]
+        if 'add_parameter_btn' in request.POST.keys():
+            parameter_form.extra = +1
+            self.success_url = reverse_lazy('polls:update_parameter', args=[form_instance.id])
+        elif 'add_step_btn' in request.POST.keys():
+            step_form.extra = +1
+            self.success_url = reverse_lazy('polls:update_parameter', args=[form_instance.id])
+        elif 'add_note_btn' in request.POST.keys():
+            note_form.extra = +1
+            self.success_url = reverse_lazy('polls:update_parameter', args=[form_instance.id])
+        else:
+            self.success_url = reverse_lazy('polls:detail', args=[form_instance.id])
+
+        if delete_entry(request, form_instance):
+            self.success_url = reverse_lazy('polls:update_parameter', args=[self.kwargs['experiment_id']])
+
         form_list = [parameter_form, step_form, note_form]
         valid_list = [child_form for child_form in form_list if
                       form.is_valid() and child_form.is_valid()]

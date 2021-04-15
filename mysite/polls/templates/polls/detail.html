@@ -1,6 +1,10 @@
 {%extends 'polls/base.html'%}
 
 {% block content %}
+<form action="{% url 'polls:index' %}" >
+    {% csrf_token %}
+    <input type="submit" value="Back to Overview">
+</form>
 
 <div>
     Created: {{ experiment.date }}

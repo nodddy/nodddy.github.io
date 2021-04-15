@@ -29,6 +29,6 @@ class StepForm(forms.ModelForm):
         fields = ['text', 'note']
 
 
-ParameterFormSet = inlineformset_factory(Experiment, Parameter, fields=('name', 'value', 'unit'), extra=1)
+ParameterFormSet = inlineformset_factory(Experiment, Parameter, fields=('name', 'value', 'unit'), extra=1, can_delete=True)
 StepFormSet = inlineformset_factory(Experiment, Step, fields=('text', 'note'), extra=1)
 NoteFormSet = inlineformset_factory(Experiment, Note, fields=('text',), extra=1)
