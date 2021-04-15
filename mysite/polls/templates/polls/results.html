@@ -1,27 +1,75 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Multiformset Demo</title>
 </head>
+
 <body>
-<h1>{{ question.question_text }}</h1>
+<div>
+    <h1>Update Experiment</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <div>
+            {{ form.as_p }}
+        </div>
 
-<ul>
-{% for choice in question.choice_set.all %}
-    <li>{{ choice.choice_text }} -- {{ choice.votes }} vote{{ choice.votes|pluralize }}</li>
-{% endfor %}
-</ul>
+        <h2> Experiment Parameters </h2>
+        {{ parameter_form.management_form }}
+        {{ parameter_form.non_form_errors }}
+        {% for form in parameter_form %}
+        {{ form.id }}
+        <div class="inline">
+            {{ form.name.label_tag }}
+            {{ form.name }}
+            {{ form.value.label_tag }}
+            {{ form.value }}
+            {{ form.unit.label_tag }}
+            {{ form.unit }}
+        </div>
+        {% endfor %}
 
-<a href="{% url 'polls:detail' question.id %}">Vote again?</a>
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-<form action="{% url 'polls:vote' qu.id %}" method="post">
-{% csrf_token %}
-{% for choice in question.choice_set.all %}
-    <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
-    <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
-{% endfor %}
-<input type="submit" value="Vote">
+
+        <h2> Experiment Procedure </h2>
+        {{ step_form.management_form }}
+        {{ step_form.non_form_errors }}
+        <ol>
+            {% for form in step_form %}
+            {{ form.id }}
+            <div class="inline">
+                <li>
+                    Step |
+                    {{ form.text.errors }}
+                    {{ form.text.label_tag }}
+                    {{ form.text }}
+                    {{ form.note.errors }}
+                    {{ form.note.label_tag }}
+                    {{ form.note }}
+                </li>
+            </div>
+            {% endfor %}
+        </ol>
+
+        <h2> Experiment Procedure </h2>
+        {{ note_form.management_form }}
+        {{ note_form.non_form_errors }}
+        {% for form in note_form %}
+        {{ form.id }}
+        <div class="inline">
+            {{ form.text.errors }}
+            {{ form.text.label_tag }}
+            {{ form.text }}
+        </div>
+        {% endfor %}
+
+        <input type="submit" value="Save Changes" class="submit"/>
     </form>
+
+    <form action="." method="get">
+
+        {% csrf_token %}
+        <input type="submit" value="Cancel">
+
+    </form>
+</div>
 </body>
 </html>

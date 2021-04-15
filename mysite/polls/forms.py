@@ -1,5 +1,6 @@
 from django import forms
 from .models import Experiment, Parameter, Note, Step
+from django.forms.models import inlineformset_factory
 
 
 class ParameterForm(forms.ModelForm):
@@ -19,10 +20,15 @@ class ExperimentForm(forms.ModelForm):
 class NoteForm(forms.ModelForm):
     class Meta:
         model = Note
-        fields = ('text',)
+        fields = ['text']
 
 
 class StepForm(forms.ModelForm):
     class Meta:
         model = Step
-        fields = ('text', 'note')
+        fields = ['text', 'note']
+
+
+ParameterFormSet = inlineformset_factory(Experiment, Parameter, fields=('name', 'value', 'unit'), extra=1)
+StepFormSet = inlineformset_factory(Experiment, Step, fields=('text', 'note'), extra=1)
+NoteFormSet = inlineformset_factory(Experiment, Note, fields=('text',), extra=1)

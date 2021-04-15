@@ -16,7 +16,7 @@
     <p>No experiments are available.</p>
 {% endif %}
 
-<form action="{% url 'polls:add_experiment' %}" method="post">
+<form action="{% url 'polls:add_experiment' %}" >
     {% csrf_token %}
     <input type="submit" value="New Experiment">
 </form>
