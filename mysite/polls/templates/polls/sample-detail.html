@@ -1,0 +1,62 @@
+{%extends 'polls/base.html'%}
+
+{% block content %}
+<form action="{% url 'polls:index' %}" >
+    {% csrf_token %}
+    <input type="submit" value="Back to Overview">
+</form>
+
+<div>
+    Created: {{ experiment.date }}
+    Sample: {{ experiment.sample }}
+    <form action="{% url 'polls:sample-update-parameter' parent.id %}">
+        {% csrf_token %}
+        <input type="submit" value="Update Experiment">
+    </form>
+</div>
+
+
+<div>
+
+    <h2> Experiment Parameters </h2>
+    {% for parameter in experiment.parameter_set.all %}
+    <div class="inline">
+        {{ parameter.name }} =
+        {{ parameter.value }}
+        {{ parameter.unit }}
+    </div>
+    {% endfor %}
+
+
+    <h2> Experiment Procedure </h2>
+    <ol>
+        {% for step in experiment.step_set.all %}
+        <div class="inline">
+            <li>
+                {{ step.text }} {% if step.note != '' %} ({{ step.note }}) {% endif %}
+                {% for stepexperiment in step.stepexperiment_set.all %}
+                {% for parameter in stepexperiment.stepparameter_set.all %}
+                {{ stepexperiment.name }}(
+                {{ parameter.name }} =
+                {{ parameter.value }}
+                {{ parameter.unit }} )
+                {% endfor %}
+                {% endfor %}
+                {% endfor %}
+            </li>
+        </div>
+    </ol>
+
+    <h2> Experiment Notes </h2>
+    {% for note in experiment.note_set.all %}
+    <div class="inline">
+        {{ note.text }}
+    </div>
+    {% endfor %}
+
+</div>
+
+</body>
+</html>
+</ul>
+{% endblock %}

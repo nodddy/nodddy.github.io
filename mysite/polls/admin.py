@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import Experiment, Parameter,  Note, Step, StepExperiment, StepParameter
+from .models import Experiment, Parameter,  Note, Step, Sample
 
 admin.site.register(Experiment)
 admin.site.register(Parameter)
 admin.site.register(Note)
 admin.site.register(Step)
-admin.site.register(StepExperiment)
-admin.site.register(StepParameter)
+admin.site.register(Sample)
+

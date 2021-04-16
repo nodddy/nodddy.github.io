@@ -6,7 +6,9 @@
 
 <body>
 <div>
-    <h1>Update Experiment</h1>
+    <h1>Experiment</h1>
+    {% block new_experiment %}
+    {% endblock %}
     <form method="POST">
         {% csrf_token %}
         <div>
@@ -71,7 +73,7 @@
         </div>
 
 
-        <input type="submit" value="Save Changes" class="submit"/>
+        <input type="submit" value="Save" class="submit"/>
     </form>
 
     <form action="." method="get">

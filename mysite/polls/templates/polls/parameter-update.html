@@ -1,0 +1,62 @@
+{% load staticfiles %}
+
+<script type="text/javascript" src="{{ STATIC_URL }} /static/jquery-3.6.0.js">
+</script>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Parameter Update</title>
+</head>
+
+<body>
+<div>
+    <form method="POST">
+        {% csrf_token %}
+        <h2> Parameters </h2>
+        {{ formset.management_form }}
+        {{ formset.non_form_errors }}
+        {% if form_invalid %}
+        Invalid Input
+        {% endif %}
+        {% for form in formset %}
+        {{ form.id }}
+
+        <div class="row form-row spacer">
+            <div class="input-group">
+            {{ form.name.label_tag }}
+            {{ form.name }}
+            {{ form.value.label_tag }}
+            {{ form.value }}
+            {{ form.unit.label_tag }}
+            {{ form.unit }}
+            {{ formset.management_form.total_forms }}
+            <input type="submit" class="button" value="Delete" name="'btn_delete{{ form.instance.id }}'" />
+            <div class="input-group-append">
+                <button class="btn btn-success add-form-row">+</button>
+            </div>
+            </div>
+            {% endfor %}
+
+
+        </div>
+
+<button type="submit" class="btn btn-block btn-primary">Create</button>
+        <input type="submit" value="Save" class="submit"/>
+    </form>
+
+    <form action="." method="get">
+        {% csrf_token %}
+        <input type="submit" value="Cancel">
+    </form>
+</div>
+</body>
+</html>
+
+<script>
+    $('#add_more').click(function() {
+        var form_idx = $('#id_form-TOTAL_FORMS').val();
+        $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
+        $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
+    });
+</script>

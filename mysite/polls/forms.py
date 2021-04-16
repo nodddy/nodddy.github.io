@@ -1,7 +1,12 @@
 from django import forms
-from .models import Experiment, Parameter, Note, Step
+from .models import Experiment, Parameter, Note, Step, Sample
 from django.forms.models import inlineformset_factory
 
+
+class SampleForm(forms.ModelForm):
+    class Meta:
+        model = Sample
+        fields = ('name',)
 
 class ParameterForm(forms.ModelForm):
     class Meta:

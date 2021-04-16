@@ -1,18 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>index file</title>
-</head>
-<body>
-    <form   method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="Submit" name="Submit" value="Accept"> Save</button>
-    </form>
-    <input type=button value="Cancel" onClick="javascript:history.go(-1);">
-</body>
-</html>
+{%extends 'polls/results.html'%}
+
+
+{% block new_experiment %}
+
+<input type="submit" value="Import from Template" >
+<input type="submit" value="Import from existing Experiment" >
+
+{% endblock %}
 
 
 
