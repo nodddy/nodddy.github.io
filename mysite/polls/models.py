@@ -44,17 +44,17 @@ class Step(models.Model):
 
 
 class Note(models.Model):
-    step = models.ForeignKey(Step, on_delete=models.CASCADE, related_name='step_note', blank=True, null=True)
-    sample = models.ForeignKey(Sample, on_delete=models.CASCADE, related_name='sample_note', blank=True, null=True)
-    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE, related_name='experiment_note', blank=True,
+    step = models.ForeignKey(Step, on_delete=models.CASCADE, related_name='step_notes', blank=True, null=True)
+    sample = models.ForeignKey(Sample, on_delete=models.CASCADE, related_name='sample_notes', blank=True, null=True)
+    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE, related_name='experiment_notes', blank=True,
                                    null=True)
     text = models.CharField(max_length=400)
 
 
 class Parameter(models.Model):
-    step = models.ForeignKey(Step, on_delete=models.CASCADE, related_name='step_parameter', blank=True, null=True)
-    sample = models.ForeignKey(Sample, on_delete=models.CASCADE, related_name='sample_parameter', blank=True, null=True)
-    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE, related_name='experiment_parameter',
+    step = models.ForeignKey(Step, on_delete=models.CASCADE, related_name='step_parameters', blank=True, null=True)
+    sample = models.ForeignKey(Sample, on_delete=models.CASCADE, related_name='sample_parameters', blank=True, null=True)
+    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE, related_name='experiment_parameters',
                                    blank=True, null=True)
     name = models.CharField(max_length=200)
     value = models.FloatField(default=None)

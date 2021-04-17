@@ -8,10 +8,12 @@ class SampleForm(forms.ModelForm):
         model = Sample
         fields = ('name',)
 
+
 class ParameterForm(forms.ModelForm):
     class Meta:
         model = Parameter
         fields = ('name', 'value', 'unit')
+        empty_permitted = False
 
 
 class ExperimentForm(forms.ModelForm):
@@ -34,6 +36,10 @@ class StepForm(forms.ModelForm):
         fields = ['text', 'note']
 
 
-ParameterFormSet = inlineformset_factory(Experiment, Parameter, fields=('name', 'value', 'unit'), extra=1, can_delete=True)
-StepFormSet = inlineformset_factory(Experiment, Step, fields=('text', 'note'), extra=1)
-NoteFormSet = inlineformset_factory(Experiment, Note, fields=('text',), extra=1)
+
+
+
+ParameterFormSet = inlineformset_factory(Experiment, Parameter, fields=('name', 'value', 'unit'), extra=0,
+                                         can_delete=True)
+StepFormSet = inlineformset_factory(Experiment, Step, fields=('text', 'note'), extra=0)
+NoteFormSet = inlineformset_factory(Experiment, Note, fields=('text',), extra=0)

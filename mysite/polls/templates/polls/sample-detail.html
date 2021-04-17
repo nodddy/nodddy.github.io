@@ -7,9 +7,7 @@
 </form>
 
 <div>
-    Created: {{ experiment.date }}
-    Sample: {{ experiment.sample }}
-    <form action="{% url 'polls:sample-update-parameter' parent.id %}">
+    <form action="{% url 'polls:sample-update-parameter' parent_id %}">
         {% csrf_token %}
         <input type="submit" value="Update Experiment">
     </form>
@@ -19,18 +17,20 @@
 <div>
 
     <h2> Experiment Parameters </h2>
-    {% for parameter in experiment.parameter_set.all %}
+
+    {% block sample-update-parameter %}
+    {% for parameter in parent.sample_parameters.all %}
     <div class="inline">
         {{ parameter.name }} =
         {{ parameter.value }}
         {{ parameter.unit }}
     </div>
     {% endfor %}
-
+    {% endblock %}
 
     <h2> Experiment Procedure </h2>
     <ol>
-        {% for step in experiment.step_set.all %}
+        {% for step in parent.sample_steps.all %}
         <div class="inline">
             <li>
                 {{ step.text }} {% if step.note != '' %} ({{ step.note }}) {% endif %}
@@ -48,7 +48,7 @@
     </ol>
 
     <h2> Experiment Notes </h2>
-    {% for note in experiment.note_set.all %}
+    {% for note in parent.sample_notes.all %}
     <div class="inline">
         {{ note.text }}
     </div>

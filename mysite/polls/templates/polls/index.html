@@ -5,6 +5,9 @@
     <title>index file</title>
 </head>
 <body>
+{% load static %}
+<script src="{% static 'jquery/jquery.js' %}"></script>
+
 <h1> Latest Experiments: </h1>
 {% if experiment_list %}
     <ul>
@@ -15,16 +18,19 @@
 {% else %}
     <p>No experiments are available.</p>
 {% endif %}
+{% if sample_list %}
+    <ul>
+        {% for sample in sample_list %}
+            <li><a href="{%url 'polls:detail' experiment.id%}">{{ sample.name }} </a></li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No experiments are available.</p>
+{% endif %}
 
-<form action="{% url 'polls:add_experiment' %}" >
-    {% csrf_token %}
-    <input type="submit" value="New Experiment">
-</form>
 
-<form action="{% url 'polls:sample-detail' 'abc' %}" >
-    {% csrf_token %}
-    <input type="submit" value="Sample detail">
-</form>
+
+
 
 </body>
 </html>

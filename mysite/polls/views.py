@@ -13,7 +13,7 @@ from .models import Parameter, Experiment, Sample
 def index(request):
     context = {
         'experiment_list': Experiment.objects.order_by('-date'),
-    }
+        'sample_list': SampleForm.objects.all()}
     return render(request, 'polls/index.html', context)
 
 
@@ -27,7 +27,7 @@ class ParameterUpdateView(generic.UpdateView):
     formset = inlineformset_factory(parent_model,
                                     model,
                                     fields=fields,
-                                    extra=1,
+                                    extra=0,
                                     can_delete=True)
 
     def get(self, request, *args, **kwargs):
@@ -36,37 +36,35 @@ class ParameterUpdateView(generic.UpdateView):
         """
         self.object = get_object_or_404(self.parent_model, id=self.kwargs['parent_id'])
         return self.render_to_response(self.get_context_data(parent_id=self.object.id,
-                                                             formset=self.formset(instance=self.object)))
+                                                             formset=self.formset(instance=self.object, prefix='form')))
 
     def post(self, request, *args, **kwargs):
-        def delete_entry(request):
-            delete_btn_identifier = re.search(r'btn_delete\d', urllib.parse.urlencode(request.POST))
-            if delete_btn_identifier is not None:
-                entry = get_object_or_404(self.model, id=delete_btn_identifier.group()[-1])
-                entry.delete()
-                return self.form_invalid(request)
-        def add_row(request):
-            add_row_btn_identifier = re.search(r'btn_add_row\d', urllib.parse.urlencode(request.POST))
-            if add_row_btn_identifier is not None:
-                return self.form_valid(request)
+        delete_btn_identifier = re.search(r'btn_delete-\d+', urllib.parse.urlencode(request.POST))
+        if delete_btn_identifier is not None:
+            entry = get_object_or_404(self.model, id=delete_btn_identifier.group().split('-')[1])
+            entry.delete()
+            self.form_invalid(request)
+
         self.object = get_object_or_404(self.parent_model, id=self.kwargs['parent_id'])
-        form = self.formset(request.POST, instance=self.object)
-
-        delete_entry(request)
-
+        form = self.formset(self.request.POST, instance=self.object, prefix='form')
+        print(form)
         if form.is_valid():
             return self.form_valid(form)
         else:
             return self.form_invalid(request)
 
     def form_valid(self, form):
-        form.save()
+        for f in form:
+            new_f = f.save(commit=False)
+            new_f.instance = self.object
+            new_f.save()
         return HttpResponseRedirect(reverse('polls:sample-detail', kwargs={'parent_id': self.object.id}))
 
     def form_invalid(self, request):
+        self.object = get_object_or_404(self.parent_model, id=self.kwargs['parent_id'])
         return self.render_to_response(self.get_context_data(form_invalid=True,
                                                              parent_id=self.object.id,
-                                                             formset=self.formset(instance=self.object)))
+                                                             formset=self.formset(instance=self.object, prefix='form')))
 
 
 class ExperimentUpdateView(generic.UpdateView):
@@ -142,16 +140,20 @@ class ExperimentUpdateView(generic.UpdateView):
 
 
 class ExperimentDetailView(generic.DetailView):
-    template_name = 'polls/detail.html'
+    template_name = 'polls/experiment-detail.html'
+    object = None
 
-    def get_object(self):
-        id_ = self.kwargs.get('experiment_id')
-        return get_object_or_404(Experiment, id=id_)
+    def get(self, request, *args, **kwargs):
+        self.object = get_object_or_404(Sample, id=self.kwargs['parent_id'])
+        return self.render_to_response(self.get_context_data(parent=self.object,
+                                                             parent_id=self.object.id))
 
 
 class SampleDetailView(generic.DetailView):
     template_name = 'polls/sample-detail.html'
+    object = None
 
     def get(self, request, *args, **kwargs):
         self.object = get_object_or_404(Sample, id=self.kwargs['parent_id'])
-        return self.render_to_response(self.get_context_data(parent=self.object))
+        return self.render_to_response(self.get_context_data(parent=self.object,
+                                                             parent_id=self.object.id))

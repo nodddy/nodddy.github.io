@@ -1,0 +1,89 @@
+Metadata-Version: 2.1
+Name: django-static-jquery3
+Version: 5.1.0
+Summary: Django application contain jquery3 static files.
+Home-page: https://github.com/zencore-cn/zencore-issues
+Author: zencore
+Author-email: appstore@zencore.cn
+License: MIT
+Description: # django-static-jquery3
+        
+        
+        Django application contains jquery and jquery-plugins' static files.
+        
+        - Mostly we use jquery plugins, for django ships with jquery already. 
+        - We put many jquery plugins in this package, so that we will not use jquery's version from now on.
+        - Remove django from requirements.txt. We still keep django's file structure, but we will NOT need anything about django.
+        
+        ## Install
+        
+        ```shell
+        pip install django-static-jquery3
+        ```
+        
+        ## Installed Plugins
+        
+        - jquery/plugins/jquery.cookie.js
+        - jquery/plugins/jquery.utils.js
+        
+        ## Usage
+        
+        **pro/settings.py**
+        
+        ```python
+        INSTALLED_APPS = [
+            ...
+            "django_static_jquery3",
+            ...
+        ]
+        ```
+        
+        **app/template/app/index.html**
+        
+        ```html
+        {% load static %}
+        
+        <script src="{% static "jquery/jquery.js" %}"></script>
+        <script src="{% static "jquery/plugins/jquery.cookie.js" %}"></script>
+        ```
+        
+        
+        ## Releases
+        
+        ### v5.1.0 2020/09/22
+        
+        - Add jquery.jstree plugin.
+        
+        ### v5.0.0 2020/09/01
+        
+        - Rename jquery3 folder to jquery.
+        - Mostly we use jquery plugins, for django ships with jquery already. 
+        - We put many jquery plugins in this package, so that we will not use jquery's version from now on.
+        - Remove django from requirements. We still keep django's file structure, but we will need anything about django.
+        
+        ### v3.4.1.1 2020/04/23
+        
+        - Add jquery plugin: jquery.cookie.
+        - Fix document.
+        
+        ### v3.4.1.0 2020/04/10
+        
+        - Upgrade jquery to 3.4.1.
+        
+        ### v3.3.1.1 2018/03/27
+        
+        - Upgrade jquery to 3.3.1.
+        
+        ## v3.2.1 2017/12/23
+        
+        - First release with jquery 3.2.1.
+        
+Keywords: django-static-jquery3,jquery,jquery plugins
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Description-Content-Type: text/markdown

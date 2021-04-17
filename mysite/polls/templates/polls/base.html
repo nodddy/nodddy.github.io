@@ -7,7 +7,9 @@
     <title>Title</title>
 </head>
 <body>
-<h1> {{ experiment.name }} </h1>
+{% load static %}
+<script src="{% static 'jquery/jquery.js' %}"></script>
+
     {% block content %}
     {% endblock %}
 </body>

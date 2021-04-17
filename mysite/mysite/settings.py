@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'jquery'
+    'django_static_jquery3',
 ]
 
 MIDDLEWARE = [
