@@ -8,15 +8,15 @@
 
 <div>
 
-    <h2> Sample Parameters </h2>
-    {% block update-parameter %}
+    <h2> Experiment Parameters </h2>
+    {% block experiment-update-parameter %}
     <form action="{% url 'polls:sample-update-parameter' parent_id %}">
         {% csrf_token %}
         <input type="submit" value="Edit">
     </form>
 
 
-    {% for parameter in parent.sample_parameters.all %}
+    {% for parameter in parent.experiment_parameters.all %}
     <div class="inline">
         {{ parameter.name }} =
         {{ parameter.value }}
@@ -26,25 +26,30 @@
     {% endblock %}
 
 
-    <h2> Sample Notes </h2>
+    <h2> Experiment Procedure </h2>
+
+    {% for step in parent.experiment_steps.all %}
+    <div class="inline">
+        {{ step.text }}
+        ({{ step.note }}
+    </div>
+    {% endfor %}
+
+
+
+    <h2> Experiment Notes </h2>
     {% block sample-update-note %}
     <form action="{% url 'polls:sample-update-note' parent_id %}">
         {% csrf_token %}
         <input type="submit" value="Edit">
     </form>
-    {% for note in parent.sample_notes.all %}
+    {% for note in parent.experiment_notes.all %}
     <div class="inline">
         {{ note.text }}
     </div>
     {% endfor %}
     {% endblock %}
 
-    <h2> Associated Experiments </h2>
-    {% for experiment in parent.experiments.all %}
-    <div class="inline">
-        <a href="{%url 'polls:experiment-detail' experiment.id%}">{{ experiment.name }} ({{ experiment.date}}) </a>
-    </div>
-    {% endfor %}
 
 </div>
 

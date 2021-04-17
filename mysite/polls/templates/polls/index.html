@@ -12,16 +12,18 @@
 {% if experiment_list %}
     <ul>
         {% for experiment in experiment_list %}
-            <li><a href="{%url 'polls:detail' experiment.id%}">{{ experiment.name }} ({{ experiment.date}}) </a></li>
+            <li><a href="{%url 'polls:experiment-detail' experiment.id%}">{{ experiment.name }} ({{ experiment.date}}) </a></li>
         {% endfor %}
     </ul>
 {% else %}
     <p>No experiments are available.</p>
 {% endif %}
+
+<h1> Samples: </h1>
 {% if sample_list %}
     <ul>
         {% for sample in sample_list %}
-            <li><a href="{%url 'polls:detail' experiment.id%}">{{ sample.name }} </a></li>
+            <li><a href="{%url 'polls:sample-detail' sample.id%}">{{ sample.name }} </a></li>
         {% endfor %}
     </ul>
 {% else %}

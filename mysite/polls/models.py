@@ -9,7 +9,7 @@ class Sample(models.Model):
         return self.name
 
 class Experiment(models.Model):
-    sample = models.ForeignKey(Sample, on_delete=models.PROTECT)
+    sample = models.ForeignKey(Sample, on_delete=models.PROTECT, related_name='experiments')
     name = models.CharField(max_length=200)
     date = models.DateField('Date of experiment', blank=True, null=True)
 
@@ -34,8 +34,7 @@ class Data(models.Model):
 
 
 class Step(models.Model):
-    sample = models.ForeignKey(Sample, on_delete=models.CASCADE, null=True, blank=True)
-    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE, blank=True, null=True)
+    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE, related_name='experiment_steps',blank=True, null=True)
     note = models.CharField(max_length=200, blank=True)
     text = models.CharField(max_length=200)
 

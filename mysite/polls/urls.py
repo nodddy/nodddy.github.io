@@ -1,4 +1,5 @@
 from django.urls import path
+from django import forms
 
 from . import views
 from . import models
@@ -18,10 +19,29 @@ urlpatterns = [
     path('sample/<int:parent_id>/', views.SampleDetailView.as_view(),
          name='sample-detail'),
     path('sample/<int:parent_id>/update_parameter',
-         views.ParameterUpdateView.as_view(template_name='polls/parameter-update.html',
-                                           parent_model=models.Sample,
-                                           fields=['name', 'value', 'unit']
-                                           ),
+         views.ParameterUpdateView.as_view(),
+         {'template_name': 'polls/parameter-update.html',
+          'model': models.Parameter,
+          'parent_model': models.Sample,
+          'fields': ['name', 'value', 'unit']
+          },
          name='sample-update-parameter'),
+    path('experiment/<int:parent_id>/update_step',
+         views.ParameterUpdateView.as_view(),
+         {'template_name': 'polls/parameter-update.html',
+          'model': models.Parameter,
+          'parent_model': models.Sample,
+          'fields': ['name', 'value', 'unit']
+          },
+         name='experiment-update-step'),
+    path('sample/<int:parent_id>/update_note',
+         views.ParameterUpdateView.as_view(),
+         {'template_name': 'polls/note-update.html',
+          'model': models.Note,
+          'parent_model': models.Sample,
+          'fields': ['text'],
+          'formset_widgets': {'text': forms.Textarea}
+          },
+         name='sample-update-note'),
 
 ]

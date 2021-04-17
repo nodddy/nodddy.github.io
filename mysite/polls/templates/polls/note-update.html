@@ -1,5 +1,5 @@
 {% extends 'polls/sample-detail.html' %}
-{% block update-parameter %}
+{% block sample-update-note %}
 
 <div>
     <form method="POST">
@@ -13,24 +13,20 @@
             {% for form in formset %}
             {{ form.id }}
             <div>
-                {{ form.name.label_tag }}
-                {{ form.name }}
-                {{ form.value.label_tag }}
-                {{ form.value }}
-                {{ form.unit.label_tag }}
-                {{ form.unit }}
+                {{ form.text.label_tag }}
+                {{ form.text }}
                 <input type="submit" class="button" value="Delete" name="'btn_delete-{{ form.instance.id }}'"/>
                 {% endfor %}
             </div>
 
+            <div>
 
+                <input type="submit" value="Save" class="submit"/>
+            </div>
             <div id="empty_form" style="display:none">
                 {{ formset.empty_form }}
             </div>
-        </div>
-        <div>
 
-            <input type="submit" value="Save" class="submit"/>
         </div>
     </form>
     <input type="button" value="Add More" id="add_more">
@@ -48,7 +44,6 @@
         $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
         $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
     });
-
 </script>
 {% endblock %}
 

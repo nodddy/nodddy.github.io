@@ -13,27 +13,32 @@ from .models import Parameter, Experiment, Sample
 def index(request):
     context = {
         'experiment_list': Experiment.objects.order_by('-date'),
-        'sample_list': SampleForm.objects.all()}
+        'sample_list': Sample.objects.all()}
     return render(request, 'polls/index.html', context)
 
 
 class ParameterUpdateView(generic.UpdateView):
-    template_name = 'polls/parameter-update.html'
-    model = Parameter
-    parent_model = Sample
-    fields = ['name', 'value', 'unit']
-    success_url = ''
-    object = None
-    formset = inlineformset_factory(parent_model,
-                                    model,
-                                    fields=fields,
-                                    extra=0,
-                                    can_delete=True)
+    parent_model = None
+    formset_widgets = {}
+
+    def dispatch(self, request, *args, **kwargs):
+        self.template_name = kwargs.get('template_name')
+        self.model = kwargs.get('model')
+        self.parent_model = kwargs.get('parent_model', None)
+        self.fields = kwargs.get('fields')
+        self.formset_widgets = kwargs.get('formset_widgets', {})
+        self.formset = inlineformset_factory(self.parent_model,
+                                             self.model,
+                                             fields=self.fields,
+                                             extra=0,
+                                             can_delete=False)
+        return super(ParameterUpdateView, self).dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         """
         self.object is the parent instance (i.e. Experiment or Sample or Step) of the Paramenter instance
         """
+
         self.object = get_object_or_404(self.parent_model, id=self.kwargs['parent_id'])
         return self.render_to_response(self.get_context_data(parent_id=self.object.id,
                                                              formset=self.formset(instance=self.object, prefix='form')))
@@ -47,7 +52,6 @@ class ParameterUpdateView(generic.UpdateView):
 
         self.object = get_object_or_404(self.parent_model, id=self.kwargs['parent_id'])
         form = self.formset(self.request.POST, instance=self.object, prefix='form')
-        print(form)
         if form.is_valid():
             return self.form_valid(form)
         else:
@@ -144,7 +148,7 @@ class ExperimentDetailView(generic.DetailView):
     object = None
 
     def get(self, request, *args, **kwargs):
-        self.object = get_object_or_404(Sample, id=self.kwargs['parent_id'])
+        self.object = get_object_or_404(Experiment, id=self.kwargs['parent_id'])
         return self.render_to_response(self.get_context_data(parent=self.object,
                                                              parent_id=self.object.id))
 

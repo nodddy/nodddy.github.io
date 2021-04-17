@@ -1,9 +1,10 @@
 {% extends 'polls/sample-detail.html' %}
-{% block update-parameter %}
+{% block sample-update-step %}
 
 <div>
     <form method="POST">
         {% csrf_token %}
+        <h2> Parameters </h2>
         <div id="form_set">
             {{ formset.management_form }}
             {{ formset.non_form_errors }}
@@ -16,21 +17,21 @@
                 {{ form.name.label_tag }}
                 {{ form.name }}
                 {{ form.value.label_tag }}
-                {{ form.value }}
+                {{ form.text }}
                 {{ form.unit.label_tag }}
                 {{ form.unit }}
                 <input type="submit" class="button" value="Delete" name="'btn_delete-{{ form.instance.id }}'"/>
                 {% endfor %}
             </div>
 
+            <div>
 
+                <input type="submit" value="Save" class="submit"/>
+            </div>
             <div id="empty_form" style="display:none">
                 {{ formset.empty_form }}
             </div>
-        </div>
-        <div>
 
-            <input type="submit" value="Save" class="submit"/>
         </div>
     </form>
     <input type="button" value="Add More" id="add_more">
@@ -48,7 +49,6 @@
         $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
         $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
     });
-
 </script>
 {% endblock %}
 
