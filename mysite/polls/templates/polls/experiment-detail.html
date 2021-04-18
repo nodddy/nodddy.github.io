@@ -10,7 +10,7 @@
 
     <h2> Experiment Parameters </h2>
     {% block experiment-update-parameter %}
-    <form action="{% url 'polls:sample-update-parameter' parent_id %}">
+    <form action="{% url 'polls:experiment-update-parameter' parent_id %}">
         {% csrf_token %}
         <input type="submit" value="Edit">
     </form>
@@ -27,19 +27,30 @@
 
 
     <h2> Experiment Procedure </h2>
-
+    <ol>
+    {% block experiment-update-step %}
+    <form action="{% url 'polls:experiment-update-step' parent_id %}">
+        {% csrf_token %}
+        <input type="submit" value="Edit">
+    </form>
     {% for step in parent.experiment_steps.all %}
+        <li>
     <div class="inline">
         {{ step.text }}
-        ({{ step.note }}
+        {% if step.note %}
+        ({{ step.note }})
+        {% endif %}
     </div>
+        </li>
     {% endfor %}
+    </ol>
+    {% endblock %}
 
 
 
     <h2> Experiment Notes </h2>
     {% block sample-update-note %}
-    <form action="{% url 'polls:sample-update-note' parent_id %}">
+    <form action="{% url 'polls:experiment-update-note' parent_id %}">
         {% csrf_token %}
         <input type="submit" value="Edit">
     </form>

@@ -8,6 +8,9 @@ class Sample(models.Model):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return reverse('polls:sample-detail', kwargs={'parent_id': self.id})
+
 class Experiment(models.Model):
     sample = models.ForeignKey(Sample, on_delete=models.PROTECT, related_name='experiments')
     name = models.CharField(max_length=200)

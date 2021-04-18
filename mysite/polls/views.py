@@ -20,6 +20,7 @@ def index(request):
 class ParameterUpdateView(generic.UpdateView):
     parent_model = None
     formset_widgets = {}
+    formset = None
 
     def dispatch(self, request, *args, **kwargs):
         self.template_name = kwargs.get('template_name')
@@ -41,6 +42,7 @@ class ParameterUpdateView(generic.UpdateView):
 
         self.object = get_object_or_404(self.parent_model, id=self.kwargs['parent_id'])
         return self.render_to_response(self.get_context_data(parent_id=self.object.id,
+                                                             parent=self.object,
                                                              formset=self.formset(instance=self.object, prefix='form')))
 
     def post(self, request, *args, **kwargs):
@@ -62,7 +64,8 @@ class ParameterUpdateView(generic.UpdateView):
             new_f = f.save(commit=False)
             new_f.instance = self.object
             new_f.save()
-        return HttpResponseRedirect(reverse('polls:sample-detail', kwargs={'parent_id': self.object.id}))
+            print(self.get_success_url())
+        return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, request):
         self.object = get_object_or_404(self.parent_model, id=self.kwargs['parent_id'])
@@ -71,76 +74,28 @@ class ParameterUpdateView(generic.UpdateView):
                                                              formset=self.formset(instance=self.object, prefix='form')))
 
 
-class ExperimentUpdateView(generic.UpdateView):
-    template_name = 'polls/results.html'
-    form_class = ExperimentForm
-    model = Experiment
+class ChildUpdateView(ParameterUpdateView):
+    child_model = None
+    child_fields = {}
+    child_formset = None
+    object = None
 
-    def get(self, request, *args, **kwargs):
-        try:
-            experiment = get_object_or_404(Experiment, id=self.kwargs['experiment_id'])
-            self.object = experiment
-        except KeyError:
-            self.object = None
+    def dispatch(self, request, *args, **kwargs):
+        self.model = kwargs.get('model')
+        self.child_model = kwargs.get('child_model')
+        self.child_fields = kwargs.get('child_fields')
+        self.child_formset = inlineformset_factory(self.model,
+                                                   self.child_model,
+                                                   fields=self.child_fields,
+                                                   extra=0,
+                                                   can_delete=False)
+        return super().dispatch(request, *args, **kwargs)
 
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        parameter_form = ParameterFormSet(instance=self.object)
-        step_form = StepFormSet(instance=self.object)
-        note_form = NoteFormSet(instance=self.object)
-        return self.render_to_response(self.get_context_data(form=form,
-                                                             parameter_form=parameter_form,
-                                                             step_form=step_form,
-                                                             note_form=note_form))
-
-    def post(self, request, *args, **kwargs):
-        def delete_entry(request, form_instance):
-            delete_entry_list = [key for key in request.POST.keys() if 'btn_delete' in key]
-            if len(delete_entry_list) != 0:
-                print(delete_entry_list)
-                model_name, entry_id_from_form = delete_entry_list[0].split('-')[-1].split('.')
-
-                entry_id_list = [item.pk for item in Parameter.objects.filter(experiment=form_instance).all()]
-                try:
-                    entry_id = entry_id_list[int(entry_id_from_form) - 1]
-                    entry = Parameter.objects.get(experiment=form_instance, id=entry_id)
-                    entry.delete()
-                    return True
-                except IndexError:
-                    return True
-
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        try:
-            form_instance = get_object_or_404(self.model, id=self.kwargs['experiment_id'])
-        except KeyError:
-            form_instance = self.model.objects.create()
-
-        form.instance = form_instance
-
-        parameter_form = ParameterFormSet(self.request.POST, instance=form_instance)
-        step_form = StepFormSet(self.request.POST, instance=form_instance)
-        note_form = NoteFormSet(self.request.POST, instance=form_instance)
-
-        if not [key for key in request.POST.keys() if 'btn_delete' in key]:
-            self.success_url = reverse_lazy('polls:update_parameter', args=[form_instance.id])
-        else:
-            self.success_url = reverse_lazy('polls:detail', args=[form_instance.id])
-
-        if delete_entry(request, form_instance):
-            self.success_url = reverse_lazy('polls:update_parameter', args=[self.kwargs['experiment_id']])
-
-        form_list = [parameter_form, step_form, note_form]
-        valid_list = [child_form for child_form in form_list if
-                      form.is_valid() and child_form.is_valid()]
-        return self.form_valid(form, valid_list)
-
-    def form_valid(self, form, valid_child_list):
-        self.object = form.save()
-        for child_form in valid_child_list:
-            child_form.instance = self.object
-            child_form.save()
-        return HttpResponseRedirect(self.get_success_url())
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        self.object = get_object_or_404(self.model, id=self.kwargs['step_id'])
+        context['child_formset'] = self.child_formset(instance=self.object, prefix='child_form')
+        return context
 
 
 class ExperimentDetailView(generic.DetailView):

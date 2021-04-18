@@ -1,11 +1,23 @@
-{% extends 'polls/sample-detail.html' %}
-{% block sample-update-step %}
+{% extends 'polls/experiment-detail.html' %}
+{% block experiment-update-step %}
 
 <div>
     <form method="POST">
         {% csrf_token %}
-        <h2> Parameters </h2>
         <div id="form_set">
+            {{ formset.management_form }}
+            {{ formset.non_form_errors }}
+            {% if form_invalid %}
+            Invalid Input
+            {% endif %}
+            {% for form in formset %}
+            {{ form.id }}
+            <div>
+                {{ form.text.label_tag }}
+                {{ form.text }}
+                   {{ form.note.label_tag }}
+                {{ form.note }}
+                <div id="child_form_set">
             {{ formset.management_form }}
             {{ formset.non_form_errors }}
             {% if form_invalid %}
@@ -17,9 +29,18 @@
                 {{ form.name.label_tag }}
                 {{ form.name }}
                 {{ form.value.label_tag }}
-                {{ form.text }}
+                {{ form.value }}
                 {{ form.unit.label_tag }}
                 {{ form.unit }}
+                <input type="submit" class="button" value="Delete" name="'btn_delete-{{ form.instance.id }}'"/>
+                {% endfor %}
+            </div>
+
+
+            <div id="empty_child_form" style="display:none">
+                {{ child_formset.empty_form }}
+            </div>
+        </div>
                 <input type="submit" class="button" value="Delete" name="'btn_delete-{{ form.instance.id }}'"/>
                 {% endfor %}
             </div>
@@ -48,6 +69,13 @@
         var form_idx = $('#id_form-TOTAL_FORMS').val();
         $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
         $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
+    });
+</script>
+<script>
+    $('#add_more').click(function() {
+        var form_idx = $('#id_child_child_form-TOTAL_FORMS').val();
+        $('#child_form_set').append($('#empty_child_form').html().replace(/__prefix__/g, form_idx));
+        $('#id_child_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
     });
 </script>
 {% endblock %}
