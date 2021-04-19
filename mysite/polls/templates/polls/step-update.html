@@ -1,4 +1,5 @@
 {% extends 'polls/experiment-detail.html' %}
+{% load custom_templates %}
 {% block experiment-update-step %}
 
 <div>
@@ -11,53 +12,54 @@
             Invalid Input
             {% endif %}
             {% for form in formset %}
-            {{ form.id }}
-            <div>
-                {{ form.text.label_tag }}
-                {{ form.text }}
-                   {{ form.note.label_tag }}
-                {{ form.note }}
-                <div id="child_form_set">
-            {{ formset.management_form }}
-            {{ formset.non_form_errors }}
-            {% if form_invalid %}
-            Invalid Input
-            {% endif %}
-            {% for form in formset %}
-            {{ form.id }}
-            <div>
-                {{ form.name.label_tag }}
-                {{ form.name }}
-                {{ form.value.label_tag }}
-                {{ form.value }}
-                {{ form.unit.label_tag }}
-                {{ form.unit }}
-                <input type="submit" class="button" value="Delete" name="'btn_delete-{{ form.instance.id }}'"/>
-                {% endfor %}
-            </div>
+                {{ form.id }}
+
+                <div>
+                    {{ form.text.label_tag }}
+                    {{ form.text }}
+                    {{ form.note.label_tag }}
+                    {{ form.note }}
+
+                    <div>
+                    {% with child_formset=child_formset_list|return_item:forloop.counter0 %}
+                        {{ child_formset_list.index }}
+                        {{ child_formset.management_form }}
+                        {{ child_formset.non_form_errors }}
+
+                        {% for child_form in child_formset %}
+                            <div>
+                                {{ child_form.id}}
+                                {{ child_form }}
+                            </div>
+                        {% endfor %}
+                    {% endwith %}
+                    </div>
+                    <input type="submit" class="button" value="Delete" name="'btn_delete-{{ form.instance.id }}'"/>
+
+                        <div id="child_form_set">
+
+                            <div id="empty_child_form" style="display:none">
+                            {{ child_formset.empty_form }}
+                            </div>
+                        </div>
+
+                </div>
+            {% endfor %}
 
 
-            <div id="empty_child_form" style="display:none">
-                {{ child_formset.empty_form }}
-            </div>
-        </div>
-                <input type="submit" class="button" value="Delete" name="'btn_delete-{{ form.instance.id }}'"/>
-                {% endfor %}
-            </div>
+            <input type="button" value="Add More" id="add_more">
 
-            <div>
+            <input type="submit" value="Save" class="submit"/>
 
-                <input type="submit" value="Save" class="submit"/>
-            </div>
+
             <div id="empty_form" style="display:none">
                 {{ formset.empty_form }}
             </div>
 
         </div>
     </form>
-    <input type="button" value="Add More" id="add_more">
-
 </div>
+
 <form action="." method="get">
     {% csrf_token %}
     <input type="submit" value="Cancel">
@@ -78,5 +80,6 @@
         $('#id_child_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
     });
 </script>
+
 {% endblock %}
 

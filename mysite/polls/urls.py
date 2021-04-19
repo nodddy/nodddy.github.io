@@ -19,13 +19,13 @@ urlpatterns = [
           },
          name='experiment-update-parameter'),
 
-    path('experiment/<int:parent_id>/<int:step_id>/update_step',
+    path('experiment/<int:parent_id>/update_step',
          views.ChildUpdateView.as_view(),
          {'template_name': 'polls/step-update.html',
           'model': models.Step,
           'parent_model': models.Experiment,
           'child_model': models.Parameter,
-          'child_fields':['name', 'unit', 'value'],
+          'child_fields': ['name', 'unit', 'value'],
           'fields': ['text', 'note']
           },
          name='experiment-update-step'),
@@ -39,7 +39,6 @@ urlpatterns = [
           'formset_widgets': {'text': forms.Textarea}
           },
          name='experiment-update-note'),
-
 
     path('sample/<int:parent_id>/', views.SampleDetailView.as_view(),
          name='sample-detail'),
@@ -62,6 +61,5 @@ urlpatterns = [
           'formset_widgets': {'text': forms.Textarea}
           },
          name='sample-update-note'),
-
 
 ]

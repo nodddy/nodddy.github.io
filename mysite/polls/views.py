@@ -7,7 +7,7 @@ import re, urllib
 
 from .forms import ExperimentForm, ParameterFormSet, ParameterForm, NoteForm, NoteFormSet, StepForm, StepFormSet, \
     SampleForm
-from .models import Parameter, Experiment, Sample
+from .models import Parameter, Experiment, Sample, Step
 
 
 def index(request):
@@ -21,6 +21,7 @@ class ParameterUpdateView(generic.UpdateView):
     parent_model = None
     formset_widgets = {}
     formset = None
+    object = None
 
     def dispatch(self, request, *args, **kwargs):
         self.template_name = kwargs.get('template_name')
@@ -39,7 +40,6 @@ class ParameterUpdateView(generic.UpdateView):
         """
         self.object is the parent instance (i.e. Experiment or Sample or Step) of the Paramenter instance
         """
-
         self.object = get_object_or_404(self.parent_model, id=self.kwargs['parent_id'])
         return self.render_to_response(self.get_context_data(parent_id=self.object.id,
                                                              parent=self.object,
@@ -64,7 +64,6 @@ class ParameterUpdateView(generic.UpdateView):
             new_f = f.save(commit=False)
             new_f.instance = self.object
             new_f.save()
-            print(self.get_success_url())
         return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, request):
@@ -93,9 +92,29 @@ class ChildUpdateView(ParameterUpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        self.object = get_object_or_404(self.model, id=self.kwargs['step_id'])
-        context['child_formset'] = self.child_formset(instance=self.object, prefix='child_form')
+        self.object = get_object_or_404(self.model, id=self.kwargs['parent_id'])
+        step_list = [value for value in self.model.objects.filter(experiment=self.object.id).in_bulk().values()]
+        child_formset_list = [self.child_formset(instance=child_instance, prefix='child_form') for child_instance in
+                              step_list]
+        context['child_formset_list'] = child_formset_list
         return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = get_object_or_404(self.parent_model, id=self.kwargs['parent_id'])
+        step_list = [value for value in self.model.objects.filter(experiment=self.object.id).in_bulk().values()]
+        child_formset_list = [self.child_formset(self.request.POST, instance=child_instance, prefix='child_form') for
+                              child_instance in step_list]
+
+        for step in step_list:
+            for child_form in child_formset_list:
+                if child_form.is_valid():
+                    new_f = child_form.save(commit=False)
+                    new_f.instance = step
+                    new_f.save()
+                else:
+                    print(child_form.errors)
+                    return super().form_invalid(request)
+        return super().post(request, *args, **kwargs)
 
 
 class ExperimentDetailView(generic.DetailView):

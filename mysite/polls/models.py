@@ -11,6 +11,7 @@ class Sample(models.Model):
     def get_absolute_url(self):
         return reverse('polls:sample-detail', kwargs={'parent_id': self.id})
 
+
 class Experiment(models.Model):
     sample = models.ForeignKey(Sample, on_delete=models.PROTECT, related_name='experiments')
     name = models.CharField(max_length=200)
@@ -37,7 +38,8 @@ class Data(models.Model):
 
 
 class Step(models.Model):
-    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE, related_name='experiment_steps',blank=True, null=True)
+    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE, related_name='experiment_steps', blank=True,
+                                   null=True)
     note = models.CharField(max_length=200, blank=True)
     text = models.CharField(max_length=200)
 
@@ -55,7 +57,8 @@ class Note(models.Model):
 
 class Parameter(models.Model):
     step = models.ForeignKey(Step, on_delete=models.CASCADE, related_name='step_parameters', blank=True, null=True)
-    sample = models.ForeignKey(Sample, on_delete=models.CASCADE, related_name='sample_parameters', blank=True, null=True)
+    sample = models.ForeignKey(Sample, on_delete=models.CASCADE, related_name='sample_parameters', blank=True,
+                               null=True)
     experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE, related_name='experiment_parameters',
                                    blank=True, null=True)
     name = models.CharField(max_length=200)
