@@ -1,6 +1,6 @@
 from django.db import models
 from django.urls import reverse
-
+import datetime
 
 class Sample(models.Model):
     name = models.CharField(max_length=200)
@@ -15,7 +15,7 @@ class Sample(models.Model):
 class Experiment(models.Model):
     sample = models.ForeignKey(Sample, on_delete=models.PROTECT, related_name='experiments')
     name = models.CharField(max_length=200)
-    date = models.DateField('Date of experiment', blank=True, null=True)
+    date = models.DateField('Date of experiment', default=datetime.datetime.now)
 
     def __str__(self):
         return self.name

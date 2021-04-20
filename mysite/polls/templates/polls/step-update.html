@@ -5,6 +5,7 @@
 <div>
     <form method="POST">
         {% csrf_token %}
+
         <div id="form_set">
             {{ formset.management_form }}
             {{ formset.non_form_errors }}
@@ -12,6 +13,8 @@
             Invalid Input
             {% endif %}
             {% for form in formset %}
+
+            <li>
                 {{ form.id }}
 
                 <div>
@@ -21,31 +24,29 @@
                     {{ form.note }}
 
                     <div>
-                    {% with child_formset=child_formset_list|return_item:forloop.counter0 %}
-                        {{ child_formset_list.index }}
+                        {% with child_formset=child_formset_list|return_item:forloop.counter0 %}
                         {{ child_formset.management_form }}
-                        {{ child_formset.non_form_errors }}
-
                         {% for child_form in child_formset %}
-                            <div>
-                                {{ child_form.id}}
-                                {{ child_form }}
-                            </div>
+                        <div>
+                            {{child_form.id }}
+                            {{ child_form.name }}
+                            {{ child_form.value }}
+                            {{ child_form.unit }}
+                        </div>
                         {% endfor %}
-                    {% endwith %}
+                        {% endwith %}
                     </div>
                     <input type="submit" class="button" value="Delete" name="'btn_delete-{{ form.instance.id }}'"/>
 
-                        <div id="child_form_set">
-
-                            <div id="empty_child_form" style="display:none">
-                            {{ child_formset.empty_form }}
-                            </div>
-                        </div>
-
                 </div>
+            </li>
             {% endfor %}
 
+            <div id="child_form_set">
+                <div id="empty_child_form" style="display:none">
+                    {{ child_formset.empty_form }}
+                </div>
+            </div>
 
             <input type="button" value="Add More" id="add_more">
 
@@ -61,7 +62,6 @@
 </div>
 
 <form action="." method="get">
-    {% csrf_token %}
     <input type="submit" value="Cancel">
 </form>
 
@@ -72,13 +72,21 @@
         $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
         $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
     });
+
+
+
+
 </script>
 <script>
     $('#add_more').click(function() {
-        var form_idx = $('#id_child_child_form-TOTAL_FORMS').val();
+        var form_idx = $('#id_child_form-TOTAL_FORMS').val();
         $('#child_form_set').append($('#empty_child_form').html().replace(/__prefix__/g, form_idx));
         $('#id_child_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
     });
+
+
+
+
 </script>
 
 {% endblock %}

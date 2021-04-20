@@ -10,6 +10,11 @@ urlpatterns = [
 
     path('experiment/<int:parent_id>/', views.ExperimentDetailView.as_view(),
          name='experiment-detail'),
+
+    path('create_experiment',
+         views.ExperimentCreateView.as_view(),
+         name='create-experiment'),
+
     path('experiment/<int:parent_id>/update_parameter',
          views.ParameterUpdateView.as_view(),
          {'template_name': 'polls/parameter-update.html',

@@ -12,12 +12,23 @@
 {% if experiment_list %}
     <ul>
         {% for experiment in experiment_list %}
-            <li><a href="{%url 'polls:experiment-detail' experiment.id%}">{{ experiment.name }} ({{ experiment.date}}) </a></li>
+            <li><a
+                href="{%url 'polls:experiment-detail' experiment.id%}">
+                {{ experiment.name }}
+                {% if not experiment.date is None %}
+                    ({{ experiment.date}})
+                {% endif %}
+            </a></li>
         {% endfor %}
     </ul>
 {% else %}
     <p>No experiments are available.</p>
 {% endif %}
+
+<form action="{% url 'polls:create-experiment' %}" method="get">
+    <input type="submit" value="New Experiment">
+</form>
+
 
 <h1> Samples: </h1>
 {% if sample_list %}
