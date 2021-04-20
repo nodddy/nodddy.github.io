@@ -62,13 +62,15 @@ class ParameterUpdateView(generic.UpdateView):
     formset = None
     object = None
     extra = 0
+    update_name = ''
 
     def dispatch(self, request, *args, **kwargs):
+        self.update_name = kwargs.get('update_name')
         self.template_name = kwargs.get('template_name')
         self.model = kwargs.get('model')
         self.parent_model = kwargs.get('parent_model', None)
         self.fields = kwargs.get('fields')
-        self.extra = kwargs.get('extra', 0)
+        self.extra = kwargs.get('extra', 1)
         self.formset_widgets = kwargs.get('formset_widgets', {})
         self.formset = inlineformset_factory(self.parent_model,
                                              self.model,
@@ -83,11 +85,15 @@ class ParameterUpdateView(generic.UpdateView):
         self.object is the parent instance (i.e. Experiment or Sample or Step) of the Paramenter instance
         """
         self.object = get_object_or_404(self.parent_model, id=self.kwargs['parent_id'])
-        return self.render_to_response(self.get_context_data(parent_id=self.object.id,
+        return self.render_to_response(self.get_context_data(update_name=self.update_name,
+                                                             parent_id=self.object.id,
                                                              parent=self.object,
                                                              formset=self.formset(instance=self.object, prefix='form')))
 
     def post(self, request, *args, **kwargs):
+        if 'cancel' in request.POST:
+            return HttpResponseRedirect(self.get_success_url())
+
         delete_btn_identifier = re.search(r'btn_delete-\d+', urllib.parse.urlencode(request.POST))
         if delete_btn_identifier is not None:
             entry = get_object_or_404(self.model, id=delete_btn_identifier.group().split('-')[1])
@@ -102,9 +108,11 @@ class ParameterUpdateView(generic.UpdateView):
 
     def form_valid(self, form):
         for f in form:
-            new_f = f.save(commit=False)
-            new_f.instance = self.object
-            new_f.save()
+            print(form.cleaned_data)
+            if f.cleaned_data != {}:
+                new_f = f.save(commit=False)
+                new_f.instance = self.object
+                new_f.save()
         return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, request):
@@ -125,7 +133,7 @@ class ChildUpdateView(ParameterUpdateView):
         self.child_formset = inlineformset_factory(self.model,
                                                    self.child_model,
                                                    fields=self.child_fields,
-                                                   extra=0,
+                                                   extra=1,
                                                    can_delete=False)
 
         return super().dispatch(request, *args, **kwargs)

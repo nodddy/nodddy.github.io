@@ -17,10 +17,11 @@ urlpatterns = [
 
     path('experiment/<int:parent_id>/update_parameter',
          views.ParameterUpdateView.as_view(),
-         {'template_name': 'polls/parameter-update.html',
+         {'template_name': 'polls/experiment-detail.html',
           'model': models.Parameter,
           'parent_model': models.Experiment,
-          'fields': ['name', 'value', 'unit']
+          'fields': ['name', 'value', 'unit'],
+          'update_name': 'parameter'
           },
          name='experiment-update-parameter'),
 
@@ -30,18 +31,19 @@ urlpatterns = [
           'model': models.Step,
           'parent_model': models.Experiment,
           'child_model': models.Parameter,
-          'child_fields': ['name', 'unit', 'value'],
+          'child_fields': ['name','value', 'unit'],
           'fields': ['text', 'note']
           },
          name='experiment-update-step'),
 
     path('experiment/<int:parent_id>/update_note',
          views.ParameterUpdateView.as_view(),
-         {'template_name': 'polls/note-update.html',
+         {'template_name': 'polls/experiment-detail.html',
           'model': models.Note,
           'parent_model': models.Experiment,
           'fields': ['text'],
-          'formset_widgets': {'text': forms.Textarea}
+          'formset_widgets': {'text': forms.Textarea},
+          'update_name': 'note'
           },
          name='experiment-update-note'),
 
@@ -50,20 +52,22 @@ urlpatterns = [
 
     path('sample/<int:parent_id>/update_parameter',
          views.ParameterUpdateView.as_view(),
-         {'template_name': 'polls/parameter-update.html',
+         {'template_name': 'polls/sample-detail.html',
           'model': models.Parameter,
           'parent_model': models.Sample,
           'fields': ['name', 'value', 'unit'],
+          'update_name': 'parameter'
           },
          name='sample-update-parameter'),
 
     path('sample/<int:parent_id>/update_note',
          views.ParameterUpdateView.as_view(),
-         {'template_name': 'polls/note-update.html',
+         {'template_name': 'polls/sample-detail.html',
           'model': models.Note,
           'parent_model': models.Sample,
           'fields': ['text'],
-          'formset_widgets': {'text': forms.Textarea}
+          'formset_widgets': {'text': forms.Textarea},
+          'update_name': 'note'
           },
          name='sample-update-note'),
 

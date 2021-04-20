@@ -1,6 +1,7 @@
 {%extends 'polls/base.html'%}
 
 {% block content %}
+
 <form action="{% url 'polls:index' %}">
     {% csrf_token %}
     <input type="submit" value="Back to Overview">
@@ -11,7 +12,8 @@
     {{ experiment.name }}
 </h1>
 
-{% block update-experiment %}
+
+
 
 <ul>
 
@@ -23,22 +25,27 @@
 </ul>
 
 
-<h2> Experiment Parameters
+<h2> Experiment Parameters</h2>
 
-    <form action="{% url 'polls:experiment-update-parameter' parent_id %}">
-        {% csrf_token %}
-        <input type="submit" value="Edit">
-    </form>
-</h2>
-{% block experiment-update-parameter %}
-{% for parameter in parent.experiment_parameters.all %}
-<div class="inline">
-    {{ parameter.name }} =
-    {{ parameter.value }}
-    {{ parameter.unit }}
-</div>
-{% endfor %}
-{% endblock %}
+    {% if update_name == 'parameter' %}
+        {% include 'polls/child-update-form.html' %}
+
+    {% else %}
+        <form action="{% url 'polls:experiment-update-parameter' parent_id %}">
+            {% csrf_token %}
+            <input type="submit" value="Edit">
+        </form>
+
+        {% for parameter in parent.experiment_parameters.all %}
+            <div class="inline">
+                {{ parameter.name }} =
+                {{ parameter.value }}
+                {{ parameter.unit }}
+            </div>
+        {% endfor %}
+
+    {% endif %}
+
 
 
 <h2> Experiment Procedure
@@ -60,6 +67,7 @@
 
                 {% for step_parameter in step.step_parameters.all %}
                 <li>
+                    Step Parameters:
                     {{ step_parameter.name }} =
                     {{ step_parameter.value }}
                     {{ step_parameter.unit }}
@@ -75,24 +83,25 @@
 </ol>
 
 
-<h2> Experiment Notes
-    {% block sample-update-note %}
-    <form action="{% url 'polls:experiment-update-note' parent_id %}" method="GET">
-        <input type="submit" value="Edit">
-    </form>
-</h2>
-{% for note in parent.experiment_notes.all %}
-<div class="inline">
-    {{ note.text }}
+<h2> Experiment Notes</h2>
+
+    {% if update_name == "note" %}
+        {% include 'polls/child-update-form.html' %}
+
+    {% else %}
+        <form action="{% url 'polls:experiment-update-note' parent_id %}" method="GET">
+            <input type="submit" value="Edit">
+        </form>
+
+        {% for note in parent.experiment_notes.all %}
+            <div class="inline">
+                {{ note.text }}
+            </div>
+        {% endfor %}
+    {% endif %}
 </div>
-{% endfor %}
-{% endblock %}
 
 
-</div>
 
-</body>
-</html>
 
-{% endblock %}
 {% endblock %}

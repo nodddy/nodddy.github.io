@@ -1,6 +1,3 @@
-{% extends 'polls/sample-detail.html' %}
-{% block update-parameter %}
-
 <div>
     <form method="POST">
         {% csrf_token %}
@@ -8,38 +5,31 @@
             {{ formset.management_form }}
             {{ formset.non_form_errors }}
             {% if form_invalid %}
-            Invalid Input
+            <b> Invalid Input </b>
             {% endif %}
             {% for form in formset %}
-            {{ form.id }}
             <div>
-                {{ form.name.label_tag }}
-                {{ form.name }}
-                {{ form.value.label_tag }}
-                {{ form.value }}
-                {{ form.unit.label_tag }}
-                {{ form.unit }}
-                <input type="submit" class="button" value="Delete" name="'btn_delete-{{ form.instance.id }}'"/>
+                {{ form.id }}
+                {% for field in form.visible_fields %}
+                {{ field.label_tag }}{{ field }}
                 {% endfor %}
+                <input type="submit" class="button" value="Delete" name="'btn_delete-{{ form.instance.id }}'"/>
             </div>
-
+            {% endfor %}
 
             <div id="empty_form" style="display:none">
-                {{ formset.empty_form }}
+                <li>{{ formset.empty_form }}</li>
             </div>
+
         </div>
+        <input type="button" value="Add More" id="add_more">
         <div>
 
             <input type="submit" value="Save" class="submit"/>
+            <input type="submit" value="Cancel" name="cancel"/>
         </div>
     </form>
-    <input type="button" value="Add More" id="add_more">
-
 </div>
-<form action="." method="get">
-    {% csrf_token %}
-    <input type="submit" value="Cancel">
-</form>
 
 
 <script>
@@ -48,7 +38,6 @@
         $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
         $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
     });
-
 </script>
-{% endblock %}
+
 
