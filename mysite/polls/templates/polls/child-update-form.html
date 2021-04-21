@@ -13,7 +13,9 @@
                 {% for field in form.visible_fields %}
                 {{ field.label_tag }}{{ field }}
                 {% endfor %}
+                {% if form.instance.id  is not None %}
                 <input type="submit" class="button" value="Delete" name="'btn_delete-{{ form.instance.id }}'"/>
+                {% endif %}
             </div>
             {% endfor %}
 

@@ -12,8 +12,16 @@ urlpatterns = [
          name='experiment-detail'),
 
     path('create_experiment',
-         views.ExperimentCreateView.as_view(),
+         views.ExperimentUpdateView.as_view(),
+        {'template_name': 'polls/update-experiment.html'},
          name='create-experiment'),
+
+    path('experiment/<int:parent_id>/update_experiment',
+         views.ExperimentUpdateView.as_view(),
+         {'template_name': 'polls/experiment-detail.html',
+          'update_name': 'experiment',
+          },
+         name='update-experiment'),
 
     path('experiment/<int:parent_id>/update_parameter',
          views.ParameterUpdateView.as_view(),
@@ -31,7 +39,7 @@ urlpatterns = [
           'model': models.Step,
           'parent_model': models.Experiment,
           'child_model': models.Parameter,
-          'child_fields': ['name','value', 'unit'],
+          'child_fields': ['name', 'value', 'unit'],
           'fields': ['text', 'note']
           },
          name='experiment-update-step'),
