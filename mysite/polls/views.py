@@ -3,11 +3,12 @@ from django.http import Http404
 from django.views import generic, View
 from django.http import HttpResponseRedirect
 from django.forms.models import inlineformset_factory
+from django.core.files.storage import FileSystemStorage
 from django.urls import reverse_lazy
 import re, urllib
 
 from .models import Experiment, Sample
-from .forms import ExperimentForm
+from .forms import ExperimentForm, FileUploadForm
 
 
 def index(request):
@@ -19,6 +20,18 @@ def index(request):
         'sample_list': Sample.objects.exclude(experiments=None)}
     return render(request, 'polls/index.html', context)
 
+class FileUploadView(generic.FormView):
+    template_name = 'polls/file-upload.html'
+    form_class = FileUploadForm
+    parent_id=int()
+
+    def post(self, request, *args, **kwargs):
+        print(request.FILES)
+        uploaded_file=request.FILES['document']
+        fs=FileSystemStorage()
+        name=fs.save(uploaded_file.name, uploaded_file)
+        url=fs.url(name)
+        return super().post(request, *args, **kwargs)
 
 class UpdateCreateView(generic.FormView):
     template_name = ''
@@ -47,7 +60,10 @@ class UpdateCreateView(generic.FormView):
         context = super(UpdateCreateView, self).get_context_data(form='', **kwargs)
         context['update_name'] = self.update_name
         context['parent_id'] = self.parent_id
-        context['parent'] = self.get_object()
+        try:
+            context['parent'] = self.get_object()
+        except Http404:
+            pass
         return context
 
     def get(self, request, *args, **kwargs):
@@ -70,11 +86,11 @@ class UpdateCreateView(generic.FormView):
             formset = self.formset(request.POST, prefix='form')
 
         if formset.is_valid():
-            return self.form_valid(formset)
+            return self.form_valid(formset, request)
         else:
             return self.form_invalid(formset)
 
-    def form_valid(self, formset):
+    def form_valid(self, formset, request=None):
         for form in formset:
             if form.cleaned_data != {}:
                 form_instance = form.save(commit=False)
@@ -121,70 +137,20 @@ class SampleDetailView(generic.DetailView):
                                                              parent_id=self.object.id))
 
 
-class ExperimentUpdateView(generic.TemplateView):
+class ExperimentUpdateView(UpdateCreateView):
     """
     Updates the experiment instance when a parent_id is given in the url or it creates a new instance.
     Along with the form for Experiment model it asks for the Sample, which gets associated or created if its not in the DB.
     """
-    experiment = None
 
-    def dispatch(self, request, *args, **kwargs):
-        """
-        Gets called when the view instance is created and is used to get kwargs from the urlconfig into the view instance.
-        """
-        self.update_name = self.kwargs.get('update_name', None)
-        self.template_name = self.kwargs.get('template_name')
-        return super().dispatch(request, *args, **kwargs)
+    def dispatch(self, request, formset=None, *args, **kwargs):
+        return super(ExperimentUpdateView, self).dispatch(request, *args, formset=ExperimentForm, **kwargs)
 
-    def get(self, request, *args, **kwargs):
-        """
-        If 'parent_id' (experiment instance id) is provided in the url it gets the experiment instance and fills the
-        form with the instance, which is passed to the context.
-        If it is not provided a 404 gets raised and an emtpy form is passed to the context.
-        """
-        try:
-            self.experiment = get_object_or_404(Experiment, id=self.kwargs.get('parent_id'))
-            parent_id = self.experiment.id
-            experiment_form = ExperimentForm(instance=self.experiment)
-        except Http404:
-            parent_id = None
-            experiment_form = ExperimentForm()
-        return self.render_to_response(self.get_context_data(experiment_form=experiment_form,
-                                                             parent_id=parent_id,
-                                                             parent=self.experiment,
-                                                             update_name=self.update_name
-                                                             ))
-
-    def post(self, request, *args, **kwargs):
-        """
-        Does the same as get with 'parent_id' but also fills the form with the POST request.
-        If the filled form is valid:    it gets saved (thus created or updated with new form data) and the Sample created,
-                                        which gets associated with the experiment.
-                                        If the Sample given is not yet in the DB, a new instance gets created.
-                                        In case of update, the old sample instance is still there but without
-                                        the experiment associated with it.
-        If not:                         The same view gets rendered again with the same POST thus preserving the
-                                        data in the filled form.
-        """
-        try:
-            self.experiment = get_object_or_404(Experiment, id=self.kwargs.get('parent_id'))
-            form = ExperimentForm(request.POST, instance=self.experiment)
-        except Http404:
-            form = ExperimentForm(request.POST)
-        if form.is_valid():
-            form_instance = form.save(commit=False)
-            form_instance.sample, created = Sample.objects.get_or_create(name=request.POST['sample_name'])
-            form_instance.save()
-            return HttpResponseRedirect(reverse_lazy('polls:experiment-detail', args=[form_instance.id]))
-        else:
-            return self.form_invalid(request)
-
-    def form_invalid(self, request):
-        return self.render_to_response(self.get_context_data(experiment_form=ExperimentForm(request.POST),
-                                                             parent_id=self.experiment.id,
-                                                             parent=self.experiment,
-                                                             update_name=self.update_name
-                                                             ))
+    def form_valid(self, formset, request=None):
+        form_instance = formset.save(commit=False)
+        form_instance.sample, created = Sample.objects.get_or_create(name=request.POST['sample_name'])
+        form_instance.save()
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class ParameterUpdateView(UpdateCreateView):
@@ -265,5 +231,5 @@ class ChildUpdateView(ParameterUpdateView):
             if child_form.is_valid():
                 child_form.save()
             else:
-                return super().form_invalid(request)
+                return HttpResponseRedirect(request.path)
         return super().post(request, *args, **kwargs)

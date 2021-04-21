@@ -62,8 +62,8 @@ class Parameter(models.Model):
     experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE, related_name='experiment_parameters',
                                    blank=True, null=True)
     name = models.CharField(max_length=200)
-    value = models.FloatField(default=None)
-    unit = models.CharField(max_length=200)
+    value = models.CharField(max_length=200, blank=True, null=True)
+    unit = models.CharField(max_length=200, blank=True, null=True)
 
     def __str__(self):
         return self.name

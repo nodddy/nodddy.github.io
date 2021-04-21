@@ -2,10 +2,10 @@
 <div>
     <form method="POST">
         {% csrf_token %}
-        {{ experiment_form.errors }}
-        {{ experiment_form.non_form_errors }}
+        {{ formset.errors }}
+        {{ formset.non_form_errors }}
         <div>
-            {{ experiment_form }}
+            {{ formset }}
             Sample:<input type="Textinput" name="sample_name" required="required" value="{{parent.sample.name}}">
         </div>
             <input type="submit" value="Save" class="submit"/>

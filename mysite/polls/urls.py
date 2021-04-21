@@ -8,18 +8,22 @@ app_name = 'polls'
 urlpatterns = [
     path('', views.index, name='index'),
 
+    path('experiment/<int:parent_id>/file_upload', views.FileUploadView.as_view(), name='file-upload'),
+
     path('experiment/<int:parent_id>/', views.ExperimentDetailView.as_view(),
          name='experiment-detail'),
 
     path('create_experiment',
          views.ExperimentUpdateView.as_view(),
-        {'template_name': 'polls/update-experiment.html'},
+         {'template_name': 'polls/update-experiment.html',
+          'parent_model': models.Experiment},
          name='create-experiment'),
 
     path('experiment/<int:parent_id>/update_experiment',
          views.ExperimentUpdateView.as_view(),
          {'template_name': 'polls/experiment-detail.html',
           'update_name': 'experiment',
+          'parent_model': models.Experiment
           },
          name='update-experiment'),
 
@@ -80,3 +84,5 @@ urlpatterns = [
          name='sample-update-note'),
 
 ]
+
+
