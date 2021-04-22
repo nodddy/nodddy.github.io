@@ -29,6 +29,7 @@ class UpdateCreateView(generic.FormView):
     update_name = ''
     fields = {}
     parent_id = int()
+    success_url = None
 
     def dispatch(self, request, formset=None, *args, **kwargs):
         self.update_name = kwargs.get('update_name')
@@ -38,7 +39,10 @@ class UpdateCreateView(generic.FormView):
         self.fields = kwargs.get('fields')
         self.parent_id = kwargs.get('parent_id')
         self.formset = formset
-        self.success_url = '/'.join(request.path.split('/')[0:-1])
+        try:
+            self.success_url = self.get_object().get_absolute_url()
+        except Http404:
+            pass
         return super(UpdateCreateView, self).dispatch(request, *args, **kwargs)
 
     def get_object(self):
@@ -65,7 +69,6 @@ class UpdateCreateView(generic.FormView):
         return self.render_to_response(self.get_context_data(formset=form))
 
     def post(self, request, *args, **kwargs):
-        print(request.POST)
         if 'cancel' in request.POST:
             return HttpResponseRedirect(self.get_success_url())
 
@@ -88,8 +91,6 @@ class UpdateCreateView(generic.FormView):
         return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, formset):
-        print(formset.errors)
-        print(formset.non_form_errors())
         return self.render_to_response(self.get_context_data(form_invalid=True,
                                                              formset=formset))
 
@@ -141,6 +142,8 @@ class ExperimentUpdateView(UpdateCreateView):
         form_instance = formset.save(commit=False)
         form_instance.sample, created = Sample.objects.get_or_create(name=request.POST['sample_name'])
         form_instance.save()
+        if self.success_url is None:
+            self.success_url = get_object_or_404(Experiment, id=form_instance.id).get_absolute_url()
         return HttpResponseRedirect(self.get_success_url())
 
 
@@ -226,10 +229,11 @@ class ChildUpdateView(ParameterUpdateView):
                 return HttpResponseRedirect(request.path)
         return super().post(request, *args, **kwargs)
 
-class FileView(generic.DateDetailView):
+
+class FileView(generic.DetailView):
     template_name = 'polls/file-viewer.html'
     object = None
-    file=None
+    file = None
 
     def get(self, request, *args, **kwargs):
         """
@@ -237,9 +241,14 @@ class FileView(generic.DateDetailView):
         with the instance id (for some reason its also required for proper function)
         """
         self.object = get_object_or_404(Experiment, id=self.kwargs['parent_id'])
-        self.file=get_object_or_404(File, id=self.kwargs['file_id'])
+        self.file = get_object_or_404(File, id=self.kwargs['file_id'])
         return self.render_to_response(self.get_context_data(parent=self.object,
                                                              parent_id=self.object.id,
                                                              file_name=self.file.name,
                                                              file_url=self.file.file.url,
-                                                             file_type=self.file.type))
+                                                             file_type=self.file.type,
+                                                             file_view=True))
+
+    def post(self, request, *args, **kwargs):
+        self.object = get_object_or_404(Experiment, id=self.kwargs['parent_id'])
+        self.file = get_object_or_404(File, id=self.kwargs['file_id'])

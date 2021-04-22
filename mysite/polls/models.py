@@ -38,6 +38,7 @@ class File(models.Model):
                                      ('etc', 'other')
                                      ])
     file = models.FileField(upload_to='experiment/files/', null=True)
+    pdf = models.FileField(upload_to='experiment/files/pdf/', null=True)
     file_delimiter = models.CharField(max_length=200, blank=True, null=True,
                                       choices=[('\t', 'tag'),
                                                ('dot', '.'),

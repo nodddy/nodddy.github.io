@@ -169,7 +169,7 @@
                         <li>
                             <div class="row">
                                 <div class="col">
-                                    <a href="{%url 'polls:file-viewer' experiment.id file.id %}">{{ file }}</a>
+                                    <a href="{%url 'polls:file-viewer' parent_id file.id %}">{{ file }}</a>
                                 </div>
                                 <div class="col">{{ file.type }}</div>
                             </div>
@@ -178,9 +178,10 @@
                     </ul>
                 </div>
                 <div class="col col-lg-8">
-
-                    {% block file-viewer %}
-                    {%endblock%}
+                    {% if file_view %}
+                        {% block file-viewer %}
+                        {%endblock%}
+                    {% endif %}
 
                 </div>
             </div>
