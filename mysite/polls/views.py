@@ -161,8 +161,9 @@ class ParameterUpdateView(UpdateCreateView):
         return inlineformset_factory(self.parent_model,
                                      self.model,
                                      fields=self.fields,
+                                     widgets=self.formset_widgets,
                                      extra=self.extra,
-                                     can_delete=False
+                                     can_delete=False,
                                      )
 
     def dispatch(self, request, *args, **kwargs):

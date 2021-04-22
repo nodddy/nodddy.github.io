@@ -15,7 +15,7 @@ urlpatterns = [
 
     path('create_experiment',
          views.ExperimentUpdateView.as_view(),
-         {'template_name': 'polls/update-experiment.html',
+         {'template_name': 'polls/index.html',
           'parent_model': models.Experiment},
          name='create-experiment'),
 
@@ -54,7 +54,7 @@ urlpatterns = [
           'model': models.Note,
           'parent_model': models.Experiment,
           'fields': ['text'],
-          'formset_widgets': {'text': forms.Textarea},
+          'formset_widgets': {'text': forms.Textarea(attrs={"rows": 3})},
           'update_name': 'note'
           },
          name='experiment-update-note'),
@@ -78,11 +78,9 @@ urlpatterns = [
           'model': models.Note,
           'parent_model': models.Sample,
           'fields': ['text'],
-          'formset_widgets': {'text': forms.Textarea},
+          'formset_widgets': {'text': forms.Textarea(attrs={"rows": 3})},
           'update_name': 'note'
           },
          name='sample-update-note'),
 
 ]
-
-

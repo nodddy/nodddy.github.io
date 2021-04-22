@@ -1,21 +1,25 @@
 
-<div>
-    <form method="POST">
-        {% csrf_token %}
-        {{ formset.errors }}
-        {{ formset.non_form_errors }}
-        <div>
-            {{ formset }}
-            Sample:<input type="Textinput" name="sample_name" required="required" value="{{parent.sample.name}}">
-        </div>
-            <input type="submit" value="Save" class="submit"/>
-</form>
-
-
-</div>
-<form action="." method="get">
+<form method="POST" class="form-group">
     {% csrf_token %}
-    <input type="submit" value="Cancel">
+    {{ formset.errors }}
+    {{ formset.non_form_errors }}
+
+    <div class="row row-cols-2">
+        {% for field in formset %}
+        <div class="col">{{field.label_tag}}</div>
+        {% endfor %}
+        {% for field in formset %}
+        <div class="col">{{field}}</div>
+        {% endfor %}
+        <div class="col-8">Sample:</div>
+        <div class="col"><input type="text" class="form-control" name="sample_name" required="required"
+                                value="{{parent.sample.name}}"></div>
+    </div>
+    <div class="row row-cols-auto my-3 justify-content-md-center">
+        <div class="col"><input type="submit" value="Save" class="btn btn-success"/></div>
+        <div class="col"><input type="submit" value="Cancel" name="cancel" class="btn btn-danger"/></div>
+    </div>
 </form>
+
 
 

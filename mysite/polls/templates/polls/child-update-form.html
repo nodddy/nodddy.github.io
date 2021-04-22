@@ -1,34 +1,57 @@
+{% load custom_templates %}
+
 <div>
     <form method="POST">
         {% csrf_token %}
         <div id="form_set">
-            {{ formset.management_form }}
-            {{ formset.non_form_errors }}
+
             {% if form_invalid %}
             <b> Invalid Input </b>
             {% endif %}
+
+            {{ formset.management_form }}
+            {{ formset.non_form_errors }}
+
             {% for form in formset %}
-            <div>
-                {{ form.id }}
+
+            {{ form.id }}
+            <div class="row row-cols-{{col_count}}">
                 {% for field in form.visible_fields %}
-                {{ field.label_tag }}{{ field }}
-                {% endfor %}
-                {% if form.instance.id  is not None %}
-                <input type="submit" class="button" value="Delete" name="'btn_delete-{{ form.instance.id }}'"/>
+                <div class="col">{{field.label_tag}}</div>
+                {%endfor%}
+                <div class="col"></div>
+                {% for field in form.visible_fields %}
+                <div class="col">{{field|addclass:"form-control"}}</div>
+                {%endfor%}
+                {% if form.instance.id is not None %}
+                <div class="col">
+                    <input type="submit" class="btn btn-danger" value="Delete"
+                           name="'btn_delete-{{ form.instance.id }}'"/>
+                </div>
                 {% endif %}
             </div>
             {% endfor %}
 
-            <div id="empty_form" style="display:none">
-                <li>{{ formset.empty_form }}</li>
+
+            <div class="row row-cols-{{col_count}}" id="empty_form" style="display:none">
+                {% for field in formset.empty_form.visible_fields %}
+                <div class="col">{{field.label_tag}}</div>
+                {%endfor%}
+                <div class="col"></div>
+                {% for field in formset.empty_form.visible_fields %}
+                <div class="col">{{field|addclass:"form-control"}}</div>
+                {%endfor%}
             </div>
 
-        </div>
-        <input type="button" value="Add More" id="add_more">
-        <div>
 
-            <input type="submit" value="Save" class="submit"/>
-            <input type="submit" value="Cancel" name="cancel"/>
+        </div>
+
+
+        <div class="row row-cols-auto my-3 justify-content-md-center">
+            <div class="col"><input type="submit" value="Save" class="btn btn-success"/></div>
+            <div class="col"><input type="submit" value="Cancel" name="cancel" class="btn btn-danger"/></div>
+            <div class="col"><input type="button" value="Add Row" id="add_more" class="btn btn-info"
+                                    onclick="add_form('empty_form')"></div>
         </div>
     </form>
 </div>
@@ -40,6 +63,10 @@
         $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
         $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
     });
+
+
+
+
 </script>
 
 

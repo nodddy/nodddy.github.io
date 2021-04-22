@@ -63,7 +63,7 @@ class Parameter(models.Model):
                                    blank=True, null=True)
     name = models.CharField(max_length=200)
     value = models.CharField(max_length=200, blank=True, null=True)
-    unit = models.CharField(max_length=200, blank=True, null=True)
+    unit = models.CharField(max_length=200, blank=True, null=False)
 
     def __str__(self):
         return self.name

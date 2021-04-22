@@ -19,11 +19,11 @@
                 <div>
                     Procedure Step:
                     {% for field in form.visible_fields %}
-                        {{ field.label_tag }}
-                        {{ field }}
+                    {{ field.label_tag }}
+                    {{ field }}
                     {% endfor %}
 
-                    {% if form.instance.id  is not None %}
+                    {% if form.instance.id is not None %}
                     <input type="submit" class="button" value="Delete" name="'btn_delete-{{ form.instance.id }}'"/>
                     {% endif %}
                     <div>
@@ -35,12 +35,13 @@
                             {{child_form.id }}
                             Step Parameters:
                             {% for child_field in child_form.visible_fields %}
-                                {{ child_field.label_tag }}
-                                {{ child_field }}
+                            {{ child_field.label_tag }}
+                            {{ child_field }}
                             {% endfor %}
-                            {% if form.instance.id  is not None %}
-                    <input type="submit" class="button" value="Delete" name="'btn_delete_child-{{ child_form.instance.id }}'"/>
-                    {% endif %}
+                            {% if form.instance.id is not None %}
+                            <input type="submit" class="button" value="Delete"
+                                   name="'btn_delete_child-{{ child_form.instance.id }}'"/>
+                            {% endif %}
                         </div>
                         {% endfor %}
                         {% endwith %}
@@ -64,14 +65,13 @@
 </div>
 
 
-
-
 <script>
     $('#add_more').click(function() {
         var form_idx = $('#id_form-TOTAL_FORMS').val();
         $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
         $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
     });
+
 </script>
 <script>
     $('#add_more').click(function() {
@@ -79,6 +79,7 @@
         $('#child_form_set').append($('#empty_child_form').html().replace(/__prefix__/g, form_idx));
         $('#id_child_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
     });
+
 </script>
 
 {% endblock %}

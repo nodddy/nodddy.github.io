@@ -2,112 +2,162 @@
 
 {% block content %}
 
-<form action="{% url 'polls:index' %}">
-    <input type="submit" value="Back to Overview">
-</form>
 
+<div class="row row-cols-1 row-cols-lg-2">
+    <div class="col">
+        <div class="py-3 px-3 mb-3 bg-light text-dark">
+            <h1 class="row">
+                <div class="col">{{ parent.name }}</div>
+                <div class="col-2">
+                    {% if update_name != 'experiment' %}
+                    <form action="{% url 'polls:update-experiment' parent_id %}" method="get">
+                        <input class="btn btn-primary" type="submit" value="Edit">
+                    </form>
+                    {%endif%}
+                </div>
+            </h1>
 
-<h1>
-    {{ parent.name }}
-</h1>
-
-
-<ul>
-
-    {% if update_name == 'experiment' %}
-    {% include 'polls/update-experiment.html' %}
-
-    {% else %}
-        <form action="{% url 'polls:update-experiment' parent_id %}" method="get">
-            <input type="submit" value="Edit Experiment">
-        </form>
-        <li> Date: {{ parent.date }}</li>
-        <li> Sample:
-            <a href="{%url 'polls:sample-detail' parent.sample.id %}"> {{ parent.sample }}</a>
-        </li>
-
-    {% endif %}
-
-
-</ul>
-
-{{context}}
-<h2> Experiment Parameters</h2>
-
-{% if update_name == 'parameter' %}
-{% include 'polls/child-update-form.html' %}
-
-{% else %}
-<form action="{% url 'polls:experiment-update-parameter' parent_id %}" method="get">
-    <input type="submit" value="Edit">
-</form>
-
-{% for parameter in parent.experiment_parameters.all %}
-<div class="inline">
-    {{ parameter.name }} =
-    {{ parameter.value }}
-    {{ parameter.unit }}
-</div>
-{% endfor %}
-
-{% endif %}
-
-
-<h2> Experiment Procedure</h2>
-<ol>
-    {% block experiment-update-step %}
-    <form action="{% url 'polls:experiment-update-step' parent_id %}" method="GET">
-        <input type="submit" value="Edit">
-    </form>
-    {% for step in parent.experiment_steps.all %}
-    <li>
-        <div class="inline">
-            {{ step.text }}
-            {% if step.note %}
-            ({{ step.note }})
-            {% endif %}
+            {% if update_name == 'experiment' %}
+            {% include 'polls/update-experiment.html' %}
+            {% else %}
             <ul>
-
-                {% for step_parameter in step.step_parameters.all %}
-                <li>
-                    Step Parameters:
-                    {{ step_parameter.name }} =
-                    {{ step_parameter.value }}
-                    {{ step_parameter.unit }}
+                <li> Date: {{ parent.date }}</li>
+                <li> Sample:
+                    <a href="{%url 'polls:sample-detail' parent.sample.id %}"> {{ parent.sample }}</a>
                 </li>
-                {% endfor %}
             </ul>
+            {% endif %}
 
         </div>
-    </li>
-    {% endfor %}
-
-    {% endblock %}
-</ol>
+    </div>
 
 
-<h2> Experiment Notes</h2>
+    <div class="col">
+        <div class="py-3 px-3 mb-3 bg-light text-dark">
+            <h2>
+                <div class="row">
+                    <div class="col">Experiment Parameters</div>
+                    <div class="col-2">
+                        {% if update_name != 'parameter' %}
+                        <form action="{% url 'polls:experiment-update-parameter' parent_id %}" method="get">
+                            <input class="btn btn-primary" type="submit" value="Edit">
+                        </form>
+                        {%endif%}
+                    </div>
+                </div>
+            </h2>
+            {% if update_name == 'parameter' %}
+            {% with col_count=4 %}
+            {% include 'polls/child-update-form.html' %}
+            {% endwith %}
+            {% else %}
+            {% for parameter in parent.experiment_parameters.all %}
+            <p>
+            <div class="row ">
+                <div class="col-5"> {{ parameter.name }}</div>
+                <div class="col-md-auto">{{ parameter.value }}</div>
+                <div class="col-md-auto">{{ parameter.unit }}</div>
+            </div>
+            </p>
+            {% endfor %}
 
-{% if update_name == "note" %}
-{% include 'polls/child-update-form.html' %}
+            {% endif %}
+        </div>
+    </div>
 
-{% else %}
-<form action="{% url 'polls:experiment-update-note' parent_id %}" method="GET">
-    <input type="submit" value="Edit">
-</form>
 
-{% for note in parent.experiment_notes.all %}
-<div class="inline">
-    {{ note.text }}
+    <div class="col ">
+        <div class="py-3 px-3 mb-3 bg-light text-dark">
+            <h2 class="row">
+                <div class="col">Experiment Procedure</div>
+                <div class="col-2">
+                    {% if update_name != 'step' %}
+                    <form action="{% url 'polls:experiment-update-step' parent_id %}" method="get">
+                        <input class="btn btn-primary" type="submit" value="Edit">
+                    </form>
+                    {%endif%}
+                </div>
+            </h2>
+
+            <ol>
+                {% block experiment-update-step %}
+                {% for step in parent.experiment_steps.all %}
+                <li>
+                    <div class="inline">
+                        {{ step.text }}
+                        {% if step.note %}
+                        ({{ step.note }})
+                        {% endif %}
+                        <ul>
+                            {% for step_parameter in step.step_parameters.all %}
+                            <li>
+                                Step Parameters:
+                                {{ step_parameter.name }} =
+                                {{ step_parameter.value }}
+                                {{ step_parameter.unit }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </li>
+                {% endfor %}
+                {% endblock %}
+            </ol>
+        </div>
+    </div>
+
+
+    <div class="col">
+        <div class=" py-3 px-3 mb-3 bg-light text-dark">
+            <h2>
+                <div class="row">
+                    <div class="col">Experiment Notes</div>
+                    <div class="col-2">
+                        {% if update_name != 'step' %}
+                        <form action="{% url 'polls:experiment-update-note' parent_id %}" method="get">
+                            <input class="btn btn-primary" type="submit" value="Edit">
+                        </form>
+                        {%endif%}
+                    </div>
+                </div>
+            </h2>
+            {% if update_name == "note" %}
+            {% with col_count=1 %}
+            {% include 'polls/child-update-form.html' %}
+            {% endwith %}
+
+            {% else %}
+
+            {% for note in parent.experiment_notes.all %}
+            <div class="row">
+                <div class="col-md-auto">
+                    <ul>
+                        <li>
+                            {{ note.text }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col">
+        <div class=" py-3 px-3 mb-3 bg-light text-dark">
+            <h2>
+                <div class="row">
+                    <div class="col">Experiment Data</div>
+                    <div class="col-2">
+                    </div>
+                </div>
+            </h2>
+            <form action="{% url 'polls:file-upload' parent_id %}" method="GET">
+                            <input class="btn btn-primary" type="submit" value="File Upload">
+                        </form>
+        </div>
+    </div>
 </div>
-{% endfor %}
-{% endif %}
-</div>
 
-
-
-<form action="{% url 'polls:file-upload' parent_id %}" method="GET">
-    <input type="submit" value="File Upload">
-</form>
 
 {% endblock %}
