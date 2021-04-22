@@ -2,6 +2,7 @@ from django.db import models
 from django.urls import reverse
 import datetime
 
+
 class Sample(models.Model):
     name = models.CharField(max_length=200)
 
@@ -24,14 +25,40 @@ class Experiment(models.Model):
         return reverse('polls:experiment-detail', kwargs={'parent_id': self.id})
 
 
-class Data(models.Model):
-    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE, null=True, blank=True)
+class File(models.Model):
+    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE, related_name='experiment_files', null=True,
+                                   blank=True)
+    sample = models.ForeignKey(Sample, on_delete=models.CASCADE, related_name='sample_name', null=True, blank=True)
+    name = models.CharField(max_length=200, blank=True)
+    type = models.CharField(max_length=200, blank=True, null=True,
+                            choices=[('txt', 'txt'),
+                                     ('csv', 'csv'),
+                                     ('pdf', 'pdf'),
+                                     ('img', 'image'),
+                                     ('etc', 'other')
+                                     ])
+    file = models.FileField(upload_to='experiment/files/', null=True)
+    file_delimiter = models.CharField(max_length=200, blank=True, null=True,
+                                      choices=[('\t', 'tag'),
+                                               ('dot', '.'),
+                                               ('comma', ','),
+                                               ('semicolon', ';')
+                                               ])
+
+    def __str__(self):
+        return self.name
+
+    def delete(self, *args, **kwargs):
+        self.file.delete()
+        super().delete(*args, **kwargs)
+
+
+class Plot(models.Model):
+    file = models.ForeignKey(File, on_delete=models.PROTECT, related_name='file_plots', null=True, blank=True)
+    sample = models.ForeignKey(Sample, on_delete=models.PROTECT, related_name='sample_plots', null=True, blank=True)
     name = models.CharField(max_length=200)
-    type = models.CharField(max_length=200)
-    file = models.FileField
-    file_name = models.CharField(max_length=200)
-    file_type = models.CharField(max_length=200)
-    file_delimiter = models.CharField(max_length=200)
+    data = models.FileField()
+    img = models.ImageField()  # vielleicht jeden plot als bild abspeichern oder jeweils neu plotten. Bild speichern wenn download gewollt ist
 
     def __str__(self):
         return self.name

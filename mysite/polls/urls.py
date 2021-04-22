@@ -8,10 +8,25 @@ app_name = 'polls'
 urlpatterns = [
     path('', views.index, name='index'),
 
-    path('experiment/<int:parent_id>/file_upload', views.FileUploadView.as_view(), name='file-upload'),
+    path('experiment/<int:parent_id>/file_upload',
+         views.ParameterUpdateView.as_view(),
+         {'template_name': 'polls/experiment-detail.html',
+          'update_name': 'file',
+          'model': models.File,
+          'parent_model': models.Experiment,
+          'fields': ['name', 'file', 'type', 'file_delimiter'],
+          'formset_widgets': {'type': forms.Select(),
+                              'file_delimiter': forms.Select()},
+          },
+         name='file-upload'),
 
-    path('experiment/<int:parent_id>/', views.ExperimentDetailView.as_view(),
+    path('experiment/<int:parent_id>/',
+         views.ExperimentDetailView.as_view(),
          name='experiment-detail'),
+
+    path('experiment/<int:parent_id>/<int:file_id>/',
+         views.FileView.as_view(),
+         name='file-viewer'),
 
     path('create_experiment',
          views.ExperimentUpdateView.as_view(),

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Experiment, Data
+from .models import Experiment, File
 
 
 class ExperimentForm(forms.ModelForm):
@@ -17,5 +17,5 @@ class ExperimentForm(forms.ModelForm):
 
 class FileUploadForm(forms.ModelForm):
     class Meta:
-        model = Data
-        fields = ('name',)
+        model = File
+        fields = ('name','type', 'file', 'file_delimiter')

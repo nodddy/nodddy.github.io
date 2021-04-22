@@ -1,0 +1,14 @@
+{% extends 'polls/experiment-detail.html' %}
+
+{%block file-viewer %}
+
+
+{% with pdf_path=file_url %}
+    {% with pdf_name=file_name %}
+        {% if file_type == 'pdf' %}
+            {% include 'polls/pdf-viewer.html' %}
+        {%endif%}
+    {% endwith %}
+{% endwith %}
+
+{% endblock %}

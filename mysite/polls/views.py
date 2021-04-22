@@ -7,7 +7,7 @@ from django.core.files.storage import FileSystemStorage
 from django.urls import reverse_lazy
 import re, urllib
 
-from .models import Experiment, Sample
+from .models import Experiment, Sample, File
 from .forms import ExperimentForm, FileUploadForm
 
 
@@ -20,18 +20,6 @@ def index(request):
         'sample_list': Sample.objects.exclude(experiments=None)}
     return render(request, 'polls/index.html', context)
 
-class FileUploadView(generic.FormView):
-    template_name = 'polls/file-upload.html'
-    form_class = FileUploadForm
-    parent_id=int()
-
-    def post(self, request, *args, **kwargs):
-        print(request.FILES)
-        uploaded_file=request.FILES['document']
-        fs=FileSystemStorage()
-        name=fs.save(uploaded_file.name, uploaded_file)
-        url=fs.url(name)
-        return super().post(request, *args, **kwargs)
 
 class UpdateCreateView(generic.FormView):
     template_name = ''
@@ -77,13 +65,14 @@ class UpdateCreateView(generic.FormView):
         return self.render_to_response(self.get_context_data(formset=form))
 
     def post(self, request, *args, **kwargs):
+        print(request.POST)
         if 'cancel' in request.POST:
             return HttpResponseRedirect(self.get_success_url())
 
         try:
-            formset = self.formset(request.POST, instance=self.get_object(), prefix='form')
+            formset = self.formset(request.POST, request.FILES, instance=self.get_object(), prefix='form')
         except Http404:
-            formset = self.formset(request.POST, prefix='form')
+            formset = self.formset(request.POST, request.FILES, prefix='form')
 
         if formset.is_valid():
             return self.form_valid(formset, request)
@@ -99,6 +88,8 @@ class UpdateCreateView(generic.FormView):
         return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, formset):
+        print(formset.errors)
+        print(formset.non_form_errors())
         return self.render_to_response(self.get_context_data(form_invalid=True,
                                                              formset=formset))
 
@@ -234,3 +225,21 @@ class ChildUpdateView(ParameterUpdateView):
             else:
                 return HttpResponseRedirect(request.path)
         return super().post(request, *args, **kwargs)
+
+class FileView(generic.DateDetailView):
+    template_name = 'polls/file-viewer.html'
+    object = None
+    file=None
+
+    def get(self, request, *args, **kwargs):
+        """
+        Takes the parent_id (experiment.id) from url and gets the instance object, which gets returned in context along
+        with the instance id (for some reason its also required for proper function)
+        """
+        self.object = get_object_or_404(Experiment, id=self.kwargs['parent_id'])
+        self.file=get_object_or_404(File, id=self.kwargs['file_id'])
+        return self.render_to_response(self.get_context_data(parent=self.object,
+                                                             parent_id=self.object.id,
+                                                             file_name=self.file.name,
+                                                             file_url=self.file.file.url,
+                                                             file_type=self.file.type))

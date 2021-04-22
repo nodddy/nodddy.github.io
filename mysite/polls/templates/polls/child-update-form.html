@@ -1,7 +1,7 @@
 {% load custom_templates %}
 
 <div>
-    <form method="POST">
+    <form enctype="multipart/form-data" method="POST">
         {% csrf_token %}
         <div id="form_set">
 
@@ -19,7 +19,7 @@
                 {% for field in form.visible_fields %}
                 <div class="col">{{field.label_tag}}</div>
                 {%endfor%}
-                <div class="col"></div>
+
                 {% for field in form.visible_fields %}
                 <div class="col">{{field|addclass:"form-control"}}</div>
                 {%endfor%}
@@ -49,7 +49,7 @@
 
         <div class="row row-cols-auto my-3 justify-content-md-center">
             <div class="col"><input type="submit" value="Save" class="btn btn-success"/></div>
-            <div class="col"><input type="submit" value="Cancel" name="cancel" class="btn btn-danger"/></div>
+            <div class="col"><a href="." class="btn btn-danger">Cancel</a></div>
             <div class="col"><input type="button" value="Add Row" id="add_more" class="btn btn-info"
                                     onclick="add_form('empty_form')"></div>
         </div>
@@ -63,6 +63,10 @@
         $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
         $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
     });
+
+
+
+
 
 
 
