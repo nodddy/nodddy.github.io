@@ -291,6 +291,9 @@ class FileView(generic.DetailView):
 
         else:
             context['pdf'] = False
+            context['plot'] = True
+            #data for scatter plot is in form of [{x, y}, {x,y}] (list of dicts)
+            context['plot_y_data'] = [{'x': 1, 'y': 1, },  {'x': 2, 'y': 5, }, {'x': 3, 'y': 1, }, {'x': 5, 'y': 6, }]
         return self.render_to_response(context)
 
     def txt_to_pdf(self, file_instance):

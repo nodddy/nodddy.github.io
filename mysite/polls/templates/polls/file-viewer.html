@@ -3,12 +3,23 @@
 {%block file-viewer %}
 
 
-{% with pdf_path=file_url %}
-    {% with pdf_name=file_name %}
+
         {% if pdf %}
-            {% include 'polls/pdf-viewer.html' %}
+            {% with pdf_path=file_url %}
+            {% with pdf_name=file_name %}
+                {% include 'polls/pdf-viewer.html' %}
+            {% endwith %}
+            {% endwith %}
         {%endif%}
-    {% endwith %}
-{% endwith %}
+
+        {% if plot %}
+            {% with y_data=plot_y_data %}
+            {% with x_data=plot_x_data %}
+                {% include 'polls/plot-viewer.html' %}
+            {% endwith %}
+            {% endwith %}
+        {%endif%}
+
+
 
 {% endblock %}

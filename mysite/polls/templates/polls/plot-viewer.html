@@ -1,0 +1,37 @@
+{% load custom_templates %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
+
+<div class="bg-dark py-1 px-1">
+    <canvas id="plot"></canvas>
+</div>
+
+<script>
+
+var js_y_data = {{y_data|js}};
+var js_x_data = {{x_data|js}};
+
+
+let ctx = document.getElementById("plot").getContext("2d");
+
+let chart = new Chart(ctx, {
+  type: "scatter",
+  data: {
+     datasets: [
+        {
+          label: "legende_placeholer",
+          backgroundColor: "#79AEC8",
+          borderColor: "#417690",
+          data: js_y_data,
+          showLine: true
+        }
+     ]
+  },
+  options: {
+     title: {
+        text: "title_placeholder",
+        display: true
+     }
+  }
+});
+</script>
