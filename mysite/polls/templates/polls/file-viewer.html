@@ -5,7 +5,7 @@
 
 {% with pdf_path=file_url %}
     {% with pdf_name=file_name %}
-        {% if file_type == 'pdf' %}
+        {% if pdf %}
             {% include 'polls/pdf-viewer.html' %}
         {%endif%}
     {% endwith %}

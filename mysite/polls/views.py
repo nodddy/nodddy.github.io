@@ -6,6 +6,10 @@ from django.forms.models import inlineformset_factory
 from django.core.files.storage import FileSystemStorage
 from django.urls import reverse_lazy
 import re, urllib
+from fpdf import FPDF
+import pandas as pd
+import numpy as np
+import pdfkit
 
 from .models import Experiment, Sample, File
 from .forms import ExperimentForm, FileUploadForm
@@ -69,8 +73,6 @@ class UpdateCreateView(generic.FormView):
         return self.render_to_response(self.get_context_data(formset=form))
 
     def post(self, request, *args, **kwargs):
-        if 'cancel' in request.POST:
-            return HttpResponseRedirect(self.get_success_url())
 
         try:
             formset = self.formset(request.POST, request.FILES, instance=self.get_object(), prefix='form')
@@ -234,6 +236,16 @@ class FileView(generic.DetailView):
     template_name = 'polls/file-viewer.html'
     object = None
     file = None
+    path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+    pdf_config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
+    pdf_options = {
+        'margin-top': '0.1in',
+        'margin-right': '0.1in',
+        'margin-bottom': '0.1in',
+        'margin-left': '0.1in',
+        'minimum-font-size': 18,
+        'encoding': "UTF-8"
+    }
 
     def get(self, request, *args, **kwargs):
         """
@@ -242,13 +254,76 @@ class FileView(generic.DetailView):
         """
         self.object = get_object_or_404(Experiment, id=self.kwargs['parent_id'])
         self.file = get_object_or_404(File, id=self.kwargs['file_id'])
-        return self.render_to_response(self.get_context_data(parent=self.object,
-                                                             parent_id=self.object.id,
-                                                             file_name=self.file.name,
-                                                             file_url=self.file.file.url,
-                                                             file_type=self.file.type,
-                                                             file_view=True))
+        new_context = {'parent': self.object,
+                       'parent_id': self.object.id,
+                       'file_name': self.file.name,
+                       'file_url': self.file.file.url
+                       }
+        context = self.get_context_data()
+        context.update(new_context)
 
-    def post(self, request, *args, **kwargs):
-        self.object = get_object_or_404(Experiment, id=self.kwargs['parent_id'])
-        self.file = get_object_or_404(File, id=self.kwargs['file_id'])
+        if self.file.pdf:
+            context['pdf'] = True
+            context['file_url'] = self.file.pdf.url
+
+        elif self.file.type == 'pdf':
+            self.file.pdf.name = self.file.file.path
+            context['pdf'] = True
+
+        elif self.file.type == 'csv':
+            df = pd.read_csv(self.file.file.path, delimiter=self.file.file_delimiter)
+            self.file.csv = df.to_json()
+
+            self.file.pdf.name = self.csv_to_pdf(self.file)
+
+            context['file_url'] = self.file.pdf.url
+            context['pdf'] = True
+
+        elif self.file.type == 'txt':
+            try:
+                self.file.pdf.name = self.txt_to_pdf(self.file)
+            except UnicodeDecodeError:
+                print('PDF conversion not possible: UnicodeDecodeError')
+                context['file_error_msg'] = f'File conversion no possible. Possibly wrong file type'
+                return self.render_to_response(context)
+            context['file_url'] = self.file.pdf.url
+            context['pdf'] = True
+
+        else:
+            context['pdf'] = False
+        return self.render_to_response(context)
+
+    def txt_to_pdf(self, file_instance):
+        """
+        Takes file_instance and generates a pdf file from the txt file, then saves it to the file_instance's
+        path with .pdf added.
+        :param file_instance: the instance of file model
+        :return: A string with the pdf file path
+        """
+        output_path = f'{self.file.file.path}.pdf'
+        pdfkit.from_file(file_instance.file.path, output_path, configuration=self.pdf_config, options=self.pdf_options)
+        return output_path
+
+    def csv_to_pdf(self, file_instance):
+        """
+        Gets the csv attribute from file model and then converts it in form of a JSON string
+        to a pandas df and then html with specified CSS in 'pd_options.
+        Finally the html gets converted to pdf and saved to the file_instance path with .pdf added.
+        :param file_instance: the instance of file model
+        :return: A string with the pdf file path
+        """
+        pd_options = '<html>' \
+                     '<meta charset="utf-8">' \
+                     '<meta name="viewport" content="width=device-width, initial-scale=1">' \
+                     '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"' \
+                     ' rel="stylesheet"integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"' \
+                     ' crossorigin="anonymous">' \
+                     '<body> {table} </body>' \
+                     '</html>'  # bootstrap CSS is loaded from website
+
+        csv = file_instance.csv
+        pd.set_option('colheader_justify', 'center')
+        df_html = pd_options.format(table=pd.read_json(csv).to_html(na_rep='', classes='table'))
+        output_path = f'{file_instance.file.path}.pdf'
+        pdfkit.from_string(df_html, output_path, configuration=self.pdf_config, options=self.pdf_options)
+        return output_path

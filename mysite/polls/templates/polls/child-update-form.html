@@ -15,20 +15,26 @@
             {% for form in formset %}
 
             {{ form.id }}
-            <div class="row row-cols-{{col_count}}">
-                {% for field in form.visible_fields %}
-                <div class="col">{{field.label_tag}}</div>
-                {%endfor%}
+            <div class="row row-cols-2">
+                <div class="col-10">
+                    <div class="row row-cols-{{col_count}}">
+                        {% for field in form.visible_fields %}
+                        <div class="col">{{field.label_tag}}</div>
+                        {%endfor%}
 
-                {% for field in form.visible_fields %}
-                <div class="col">{{field|addclass:"form-control"}}</div>
-                {%endfor%}
-                {% if form.instance.id is not None %}
-                <div class="col">
+                        {% for field in form.visible_fields %}
+                        <div class="col">{{field|addclass:"form-control"}}</div>
+                        {%endfor%}
+
+                    </div>
+                </div>
+                <div class="col-2 align-self-end">
+                    {% if form.instance.id is not None %}
                     <input type="submit" class="btn btn-danger" value="Delete"
                            name="'btn_delete-{{ form.instance.id }}'"/>
+                    {% endif %}
                 </div>
-                {% endif %}
+
             </div>
             {% endfor %}
 
@@ -63,6 +69,10 @@
         $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
         $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
     });
+
+
+
+
 
 
 

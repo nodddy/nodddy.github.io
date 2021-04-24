@@ -39,11 +39,12 @@ class File(models.Model):
                                      ])
     file = models.FileField(upload_to='experiment/files/', null=True)
     pdf = models.FileField(upload_to='experiment/files/pdf/', null=True)
+    csv = models.JSONField(blank=True, null=True)
     file_delimiter = models.CharField(max_length=200, blank=True, null=True,
-                                      choices=[('\t', 'tag'),
-                                               ('dot', '.'),
-                                               ('comma', ','),
-                                               ('semicolon', ';')
+                                      choices=[('\t', 'tabstop'),
+                                               ('.', '.'),
+                                               (',', ','),
+                                               (';', ';')
                                                ])
 
     def __str__(self):

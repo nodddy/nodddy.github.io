@@ -178,10 +178,9 @@
                     </ul>
                 </div>
                 <div class="col col-lg-8">
-                    {% if file_view %}
+                    <b>{{ file_error_msg }}</b>
                         {% block file-viewer %}
                         {%endblock%}
-                    {% endif %}
 
                 </div>
             </div>
