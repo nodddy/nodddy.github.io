@@ -168,19 +168,40 @@
                         {% for file in parent.experiment_files.all %}
                         <li>
                             <div class="row">
+                                <div class="col-4 mb-3">{{ file }}</div>
                                 <div class="col">
-                                    <a href="{%url 'polls:file-viewer' parent_id file.id %}">{{ file }}</a>
+                                    <div class="row row-cols-auto">
+                                        {% if file.type != 'img' %}
+                                            <div class="col">
+                                                <a class="btn btn-primary" href="{%url 'polls:file-viewer' parent_id file.id 'pdf' %}">
+                                                    View File
+                                                </a>
+                                            </div>
+                                        {% else %}
+                                            <div class="col">
+                                                <a class="btn btn-primary" href="{%url 'polls:file-viewer' parent_id file.id 'img' %}">
+                                                    View File
+                                                </a>
+                                            </div>
+                                        {% endif %}
+
+                                        {% if file.type == 'csv' %}
+                                            <div class="col">
+                                                <a class="btn btn-primary" href="{%url 'polls:file-viewer' parent_id file.id 'csv' %}">
+                                                    Plot
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                                <div class="col">{{ file.type }}</div>
-                            </div>
                         </li>
                         {% endfor %}
                     </ul>
                 </div>
                 <div class="col col-lg-8">
                     <b>{{ file_error_msg }}</b>
-                        {% block file-viewer %}
-                        {%endblock%}
+                    {% block file-viewer %}
+                    {%endblock%}
 
                 </div>
             </div>

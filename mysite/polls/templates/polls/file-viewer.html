@@ -13,11 +13,13 @@
         {%endif%}
 
         {% if plot %}
-            {% with y_data=plot_y_data %}
-            {% with x_data=plot_x_data %}
+            {% with y_data=plot_data %}
                 {% include 'polls/plot-viewer.html' %}
             {% endwith %}
-            {% endwith %}
+        {%endif%}
+
+        {% if img %}
+
         {%endif%}
 
 

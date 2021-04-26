@@ -2,36 +2,90 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
 
-<div class="bg-dark py-1 px-1">
+<div class="py-1 px-1">
     <canvas id="plot"></canvas>
 </div>
-
+<form method="post">
+    {% csrf_token %}
+    <div class="row justify-content-center">
+        <div class="col-3"></div>
+        <div class="col-6">
+            <div class="row row-cols-2">
+                <div class="col">
+                    X-Data
+                </div>
+                <div class="col">
+                    Y-Data
+                </div>
+                <div class="col">
+                    <select class="form-control" name="x_select">
+                        {% for item in header %}
+                        <option>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col">
+                    <select class="form-control" name="y_select">
+                        {% for item in header %}
+                        <option>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-3 align-self-end">
+            <input class="btn btn-success" type="submit" value="Plot">
+        </div>
+    </div>
+</form>
 <script>
 
-var js_y_data = {{y_data|js}};
-var js_x_data = {{x_data|js}};
 
+var js_y_data = {{y_data|js}};
+var js_ylabel={{y_label|js}};
+var js_xlabel={{x_label|js}};
 
 let ctx = document.getElementById("plot").getContext("2d");
 
 let chart = new Chart(ctx, {
   type: "scatter",
-  data: {
-     datasets: [
+  data: {datasets: [{
+                     borderColor: "#000000",
+                     data: js_y_data,
+                     showLine: true
+                     }]},
+  options:
+    {
+      scales:
         {
-          label: "legende_placeholer",
-          backgroundColor: "#79AEC8",
-          borderColor: "#417690",
-          data: js_y_data,
-          showLine: true
-        }
-     ]
-  },
-  options: {
-     title: {
-        text: "title_placeholder",
-        display: true
-     }
+        yAxes: [{
+            ticks: {
+                suggestedMin: 0
+                },
+            scaleLabel: {
+                display: true,
+                labelString: js_ylabel,
+                fontSize: 18
+                }
+            }],
+        xAxes: [{
+            scaleLabel: {
+                display: true,
+                labelString: js_xlabel,
+                fontSize: 18
+                }
+            }]
+        },
+      legend: {
+        display: false,
+        position: 'top'
+      }
   }
+
 });
+
+
+
+
+
 </script>

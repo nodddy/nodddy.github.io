@@ -10,6 +10,7 @@ from fpdf import FPDF
 import pandas as pd
 import numpy as np
 import pdfkit
+import json
 
 from .models import Experiment, Sample, File
 from .forms import ExperimentForm, FileUploadForm
@@ -236,6 +237,7 @@ class FileView(generic.DetailView):
     template_name = 'polls/file-viewer.html'
     object = None
     file = None
+    file_type = ''
     path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
     pdf_config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
     pdf_options = {
@@ -247,86 +249,58 @@ class FileView(generic.DetailView):
         'encoding': "UTF-8"
     }
 
-    def get(self, request, *args, **kwargs):
+    def get_context_data(self, *args, **kwargs):
         """
         Takes the parent_id (experiment.id) from url and gets the instance object, which gets returned in context along
         with the instance id (for some reason its also required for proper function)
         """
         self.object = get_object_or_404(Experiment, id=self.kwargs['parent_id'])
         self.file = get_object_or_404(File, id=self.kwargs['file_id'])
+        self.file_type = self.kwargs['file_type']
+        x_header = kwargs.get('x_header')
+        y_header = kwargs.get('y_header')
+
         new_context = {'parent': self.object,
                        'parent_id': self.object.id,
                        'file_name': self.file.name,
-                       'file_url': self.file.file.url
+                       'file_url': f'{self.file.file.url}.pdf'
                        }
-        context = self.get_context_data()
+        context = super().get_context_data(**kwargs)
         context.update(new_context)
 
-        if self.file.pdf:
-            context['pdf'] = True
-            context['file_url'] = self.file.pdf.url
-
-        elif self.file.type == 'pdf':
-            self.file.pdf.name = self.file.file.path
-            context['pdf'] = True
-
-        elif self.file.type == 'csv':
-            df = pd.read_csv(self.file.file.path, delimiter=self.file.file_delimiter)
-            self.file.csv = df.to_json()
-
-            self.file.pdf.name = self.csv_to_pdf(self.file)
+        if self.file_type == 'csv':
+            csv_str = json.loads(self.file.csv)
+            if x_header is None or y_header is None:
+                plot_data = {key: csv_str[key] for key in list(csv_str.keys())[0:2]}
+            else:
+                plot_data = {key: csv_str[key] for key in [x_header, y_header]}
 
             context['file_url'] = self.file.pdf.url
-            context['pdf'] = True
+            context['plot_data'], context['x_label'], context['y_label'] = self.json_to_chart_data(plot_data)
+            context['header'] = [k for k in json.loads(self.file.csv).keys()]
 
-        elif self.file.type == 'txt':
-            try:
-                self.file.pdf.name = self.txt_to_pdf(self.file)
-            except UnicodeDecodeError:
-                print('PDF conversion not possible: UnicodeDecodeError')
-                context['file_error_msg'] = f'File conversion no possible. Possibly wrong file type'
-                return self.render_to_response(context)
-            context['file_url'] = self.file.pdf.url
-            context['pdf'] = True
-
-        else:
-            context['pdf'] = False
             context['plot'] = True
-            #data for scatter plot is in form of [{x, y}, {x,y}] (list of dicts)
-            context['plot_y_data'] = [{'x': 1, 'y': 1, },  {'x': 2, 'y': 5, }, {'x': 3, 'y': 1, }, {'x': 5, 'y': 6, }]
-        return self.render_to_response(context)
+        if self.file_type == 'pdf':
+            context['pdf'] = True
+        if self.file_type == 'img':
+            context['img'] = True
 
-    def txt_to_pdf(self, file_instance):
-        """
-        Takes file_instance and generates a pdf file from the txt file, then saves it to the file_instance's
-        path with .pdf added.
-        :param file_instance: the instance of file model
-        :return: A string with the pdf file path
-        """
-        output_path = f'{self.file.file.path}.pdf'
-        pdfkit.from_file(file_instance.file.path, output_path, configuration=self.pdf_config, options=self.pdf_options)
-        return output_path
+        return context
 
-    def csv_to_pdf(self, file_instance):
-        """
-        Gets the csv attribute from file model and then converts it in form of a JSON string
-        to a pandas df and then html with specified CSS in 'pd_options.
-        Finally the html gets converted to pdf and saved to the file_instance path with .pdf added.
-        :param file_instance: the instance of file model
-        :return: A string with the pdf file path
-        """
-        pd_options = '<html>' \
-                     '<meta charset="utf-8">' \
-                     '<meta name="viewport" content="width=device-width, initial-scale=1">' \
-                     '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"' \
-                     ' rel="stylesheet"integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"' \
-                     ' crossorigin="anonymous">' \
-                     '<body> {table} </body>' \
-                     '</html>'  # bootstrap CSS is loaded from website
+    def get(self, request, *args, **kwargs):
+        return self.render_to_response(self.get_context_data())
 
-        csv = file_instance.csv
-        pd.set_option('colheader_justify', 'center')
-        df_html = pd_options.format(table=pd.read_json(csv).to_html(na_rep='', classes='table'))
-        output_path = f'{file_instance.file.path}.pdf'
-        pdfkit.from_string(df_html, output_path, configuration=self.pdf_config, options=self.pdf_options)
-        return output_path
+    def post(self, request, *args, **kwargs):
+        return self.render_to_response(self.get_context_data(x_header=request.POST['x_select'],
+                                                             y_header=request.POST['y_select']))
+
+    @staticmethod
+    def json_to_chart_data(json_str):
+        header_list = [k for k in json_str.keys()]
+        data_list1 = [v.values() for v in json_str.values()]
+        if len(header_list) == 2:
+            data_list = [{'x': a, 'y': b} for a, b in zip(data_list1[0], data_list1[1])]
+            return [data_list, header_list[0], header_list[1]]
+        else:
+            data_list = [{'x': a, 'y': a} for a, a in zip(data_list1[0], data_list1[0])]
+            return [data_list, header_list[0], header_list[0]]

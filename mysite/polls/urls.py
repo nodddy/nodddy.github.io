@@ -24,7 +24,7 @@ urlpatterns = [
          views.ExperimentDetailView.as_view(),
          name='experiment-detail'),
 
-    path('experiment/<int:parent_id>/<int:file_id>/',
+    path('experiment/<int:parent_id>/<int:file_id>/<str:file_type>/',
          views.FileView.as_view(),
          name='file-viewer'),
 
