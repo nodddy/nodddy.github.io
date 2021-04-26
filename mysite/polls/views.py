@@ -259,23 +259,26 @@ class FileView(generic.DetailView):
         self.file_type = self.kwargs['file_type']
         x_header = kwargs.get('x_header')
         y_header = kwargs.get('y_header')
+        context = super().get_context_data(**kwargs)
 
         new_context = {'parent': self.object,
                        'parent_id': self.object.id,
                        'file_name': self.file.name,
                        'file_url': f'{self.file.file.url}.pdf'
                        }
-        context = super().get_context_data(**kwargs)
+
         context.update(new_context)
 
         if self.file_type == 'csv':
             csv_str = json.loads(self.file.csv)
             if x_header is None or y_header is None:
-                plot_data = {key: csv_str[key] for key in list(csv_str.keys())[0:2]}
+                if self.file.csv_plot:
+                    plot_data = {key: csv_str[key] for key in eval(self.file.csv_plot)}
+                else:
+                    plot_data = {key: csv_str[key] for key in list(csv_str.keys())[0:2]}
             else:
                 plot_data = {key: csv_str[key] for key in [x_header, y_header]}
 
-            context['file_url'] = self.file.pdf.url
             context['plot_data'], context['x_label'], context['y_label'] = self.json_to_chart_data(plot_data)
             context['header'] = [k for k in json.loads(self.file.csv).keys()]
 
@@ -291,6 +294,10 @@ class FileView(generic.DetailView):
         return self.render_to_response(self.get_context_data())
 
     def post(self, request, *args, **kwargs):
+        self.file = get_object_or_404(File, id=self.kwargs['file_id'])
+        if 'save_plot' in request.POST.keys():
+            self.file.csv_plot = [request.POST['x_select'], request.POST['y_select']]
+            self.file.save()
         return self.render_to_response(self.get_context_data(x_header=request.POST['x_select'],
                                                              y_header=request.POST['y_select']))
 
