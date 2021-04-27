@@ -1,3 +1,5 @@
+from django.shortcuts import get_object_or_404
+from django.http import Http404
 import os
 from django.db import models
 from django.urls import reverse
@@ -45,12 +47,9 @@ class File(models.Model):
     file = models.FileField(upload_to=upload_folder, null=True)
     pdf = models.FileField(null=True, blank=True)
     csv = models.JSONField(blank=True, null=True)
-    csv_plot = models.CharField(max_length=200,blank=True, null=True)
+    csv_plot = models.CharField(max_length=200, blank=True, null=True)
     file_delimiter = models.CharField(max_length=200, blank=True, null=True,
-                                      choices=[('\t', 'tabstop'),
-                                               ('.', '.'),
-                                               (',', ','),
-                                               (';', ';')]
+                                      choices=[('\t', 'tabstop'), ('.', '.'), (',', ','), (';', ';')]
                                       )
 
     path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
@@ -81,7 +80,9 @@ class File(models.Model):
         Deletes the associated file with self.file along with its pdf file. Also does not call save signals.
         """
         self.file.delete()
-        os.remove(self.absolute_path(self.pdf.name))
+        if (pdf := self.pdf):
+            pdf.delete()
+
         super().delete(*args, **kwargs)
 
     @staticmethod
@@ -94,7 +95,7 @@ class File(models.Model):
         output_path = f'{instance.absolute_path(file_name)}.pdf'
         pdfkit.from_string(instance.file._file.read().decode('utf-8'), output_path, configuration=instance.pdf_config,
                            options=instance.pdf_options)
-        return f'{file_name}.pdf'
+        return f'{instance.upload_folder}{file_name}.pdf'
 
     @staticmethod
     def csv_to_pdf(instance, file_name, file):
@@ -132,7 +133,7 @@ class File(models.Model):
         df_html = pd_options.format(table=pd.read_json(csv).to_html(na_rep='', classes='table'))
         output_path = f'{instance.absolute_path(file_name)}.pdf'
         pdfkit.from_string(df_html, output_path, configuration=instance.pdf_config, options=instance.pdf_options)
-        return f'{file_name}.pdf'
+        return f'{instance.upload_folder}{file_name}.pdf'
 
 
 @receiver(pre_save, sender=File)
@@ -146,11 +147,27 @@ def update_view_files(sender, instance, **kwargs):
     """
 
     new_file_name = f'{str(datetime.date.today())}_{get_random_string(10)}'
-    if (file := instance.file._file) is None:
-        return
-    instance.file.name = new_file_name
+    file = instance.file._file
+    try:
+        obj = get_object_or_404(sender, pk=instance.pk)
+        if obj.type == instance.type and obj.file_delimiter == instance.file_delimiter and file is None:
+            return
+        else:
+            if file is None:
+                new_file_name = obj.file.name.split('/')[-1]
+                file = instance.absolute_path(new_file_name)
+            else:
+                obj.file.delete()
+                if obj.pdf:
+                    obj.pdf.delete()
+
+    except Http404:
+        if file is None:
+            return
+    # TODO: Add file type validation for file upload in views.py
+    instance.file.name = f'{new_file_name}'
     if instance.type == 'pdf':
-        instance.pdf.name = instance.file.name
+        instance.pdf.name = f'{instance.upload_folder}{new_file_name}'
     elif instance.type == 'csv':
         instance.pdf.name = sender.csv_to_pdf(instance, new_file_name, file)
     elif instance.type == 'txt':

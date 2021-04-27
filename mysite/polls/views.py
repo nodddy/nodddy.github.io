@@ -264,11 +264,10 @@ class FileView(generic.DetailView):
         new_context = {'parent': self.object,
                        'parent_id': self.object.id,
                        'file_name': self.file.name,
-                       'file_url': f'{self.file.file.url}.pdf'
+                       'file_url': self.file.pdf.url
                        }
-
         context.update(new_context)
-
+        f'media/{File.upload_folder}{self.file.pdf}'
         if self.file_type == 'csv':
             csv_str = json.loads(self.file.csv)
             if x_header is None or y_header is None:
