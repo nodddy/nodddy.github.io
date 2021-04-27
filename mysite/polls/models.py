@@ -81,8 +81,10 @@ class File(models.Model):
         Deletes the associated file with self.file along with its pdf file. Also does not call save signals.
         """
         self.file.delete()
-        if (pdf := self.pdf):
+        if pdf := self.pdf:
             pdf.delete()
+        if img := self.img:
+            img.delete()
 
         super().delete(*args, **kwargs)
 

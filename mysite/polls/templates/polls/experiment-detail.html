@@ -171,26 +171,30 @@
                                 <div class="col-4 mb-3">{{ file }}</div>
                                 <div class="col">
                                     <div class="row row-cols-auto">
-                                        {% if file.type != 'img' %}
-                                            <div class="col">
-                                                <a class="btn btn-primary" href="{%url 'polls:file-viewer' parent_id file.id 'pdf' %}">
-                                                    View File
-                                                </a>
-                                            </div>
-                                        {% else %}
-                                            <div class="col">
-                                                <a class="btn btn-primary" href="{%url 'polls:file-viewer' parent_id file.id 'img' %}">
-                                                    View Image
-                                                </a>
-                                            </div>
-                                        {% endif %}
+                                        {% if file.type != 'etc' and file.type != None %}
+                                            {% if file.type != 'img' %}
+                                                <div class="col">
+                                                    <a class="btn btn-primary" href="{%url 'polls:file-viewer' parent_id file.id 'pdf' %}">
+                                                        View File
+                                                    </a>
+                                                </div>
+                                            {% else %}
+                                                <div class="col">
+                                                    <a class="btn btn-primary" href="{%url 'polls:file-viewer' parent_id file.id 'img' %}">
+                                                        View Image
+                                                    </a>
+                                                </div>
+                                            {% endif %}
 
-                                        {% if file.type == 'csv' %}
-                                            <div class="col">
-                                                <a class="btn btn-primary" href="{%url 'polls:file-viewer' parent_id file.id 'csv' %}">
-                                                    Plot
-                                                </a>
-                                            </div>
+                                            {% if file.type == 'csv' %}
+                                                <div class="col">
+                                                    <a class="btn btn-primary" href="{%url 'polls:file-viewer' parent_id file.id 'csv' %}">
+                                                        Plot
+                                                    </a>
+                                                </div>
+                                            {% endif %}
+                                        {% else %}
+                                            File type not supported.
                                         {% endif %}
                                     </div>
                                 </div>
