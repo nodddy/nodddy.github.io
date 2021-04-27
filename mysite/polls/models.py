@@ -46,6 +46,7 @@ class File(models.Model):
     upload_folder = 'experiment/files/'
     file = models.FileField(upload_to=upload_folder, null=True)
     pdf = models.FileField(null=True, blank=True)
+    img = models.ImageField(null=True, blank=True)
     csv = models.JSONField(blank=True, null=True)
     csv_plot = models.CharField(max_length=200, blank=True, null=True)
     file_delimiter = models.CharField(max_length=200, blank=True, null=True,
@@ -93,6 +94,7 @@ class File(models.Model):
         :return: A string with the pdf file path
         """
         output_path = f'{instance.absolute_path(file_name)}.pdf'
+        # Creates and then saves the pdf to the specified absolute path
         pdfkit.from_string(instance.file._file.read().decode('utf-8'), output_path, configuration=instance.pdf_config,
                            options=instance.pdf_options)
         return f'{instance.upload_folder}{file_name}.pdf'
@@ -101,7 +103,7 @@ class File(models.Model):
     def csv_to_pdf(instance, file_name, file):
         """
         Gets the csv attribute from file model and then converts it in form of a JSON string
-        to a pandas df and then html with specified CSS in 'pd_options.
+        to a pandas df and then html with specified CSS in 'pd_html_base.
         Finally the html gets converted to pdf and saved to the file_instance path with .pdf added.
         :param file_instance: the instance of file model
         :return: A string with the pdf file path
@@ -118,20 +120,21 @@ class File(models.Model):
                 return dataframe
 
         pd.set_option('colheader_justify', 'center')
-        pd_options = '<html>' \
-                     '<meta charset="utf-8">' \
-                     '<meta name="viewport" content="width=device-width, initial-scale=1">' \
-                     '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"' \
-                     ' rel="stylesheet"integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"' \
-                     ' crossorigin="anonymous">' \
-                     '<body> {table} </body>' \
-                     '</html>'  # bootstrap CSS is loaded from website
+        pd_html_base = '<html>' \
+                       '<meta charset="utf-8">' \
+                       '<meta name="viewport" content="width=device-width, initial-scale=1">' \
+                       '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"' \
+                       ' rel="stylesheet"integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"' \
+                       ' crossorigin="anonymous">' \
+                       '<body> {table} </body>' \
+                       '</html>'  # bootstrap CSS is loaded from website
 
         df = pd.read_csv(file, delimiter=instance.file_delimiter)
         csv = reduce_df(df).to_json()
         instance.csv = csv
-        df_html = pd_options.format(table=pd.read_json(csv).to_html(na_rep='', classes='table'))
+        df_html = pd_html_base.format(table=pd.read_json(csv).to_html(na_rep='', classes='table'))
         output_path = f'{instance.absolute_path(file_name)}.pdf'
+        # Creates and then saves the pdf to the specified absolute path
         pdfkit.from_string(df_html, output_path, configuration=instance.pdf_config, options=instance.pdf_options)
         return f'{instance.upload_folder}{file_name}.pdf'
 
@@ -139,35 +142,40 @@ class File(models.Model):
 @receiver(pre_save, sender=File)
 def update_view_files(sender, instance, **kwargs):
     """
-    Signal receiver for the save of file upload data and data conversion depending on file type. Only saves the data
-    if the file to be saved is new or different from the old one.
-    Saves the file as todays date along with a random string.
+    Signal receiver for the save of file upload data and data conversion depending on file type.
+    Creates new file and deletes the old one if the file changes.
+    Recreates the pdf file if file.type or file.file_delimiter changes with the new attributes.
+    Saves the file as today's date along with a random string.
     :param sender: model class which gets saved
     :param instance: model instance
     """
 
     new_file_name = f'{str(datetime.date.today())}_{get_random_string(10)}'
-    file = instance.file._file
-    try:
+    file = instance.file._file  # This is the uploaded file in memory
+    try:  # Checks whether a new file is created or an old entry modified with get or 404
         obj = get_object_or_404(sender, pk=instance.pk)
         if obj.type == instance.type and obj.file_delimiter == instance.file_delimiter and file is None:
-            return
+            return  # Returns if nothing or only File.name changed
         else:
             if file is None:
+                # If no new file was selected
                 new_file_name = obj.file.name.split('/')[-1]
                 file = instance.absolute_path(new_file_name)
             else:
+                # If new file is uploaded, deletes the old file and pdf
                 obj.file.delete()
                 if obj.pdf:
                     obj.pdf.delete()
-
     except Http404:
         if file is None:
             return
+
     # TODO: Add file type validation for file upload in views.py
     instance.file.name = f'{new_file_name}'
     if instance.type == 'pdf':
         instance.pdf.name = f'{instance.upload_folder}{new_file_name}'
+    elif instance.type == 'img':
+        instance.img.name = f'{instance.upload_folder}{new_file_name}'
     elif instance.type == 'csv':
         instance.pdf.name = sender.csv_to_pdf(instance, new_file_name, file)
     elif instance.type == 'txt':
