@@ -1,0 +1,49 @@
+{% extends 'core/sample-detail.html' %}
+{% block sample-update-note %}
+
+<div>
+    <form method="POST">
+        {% csrf_token %}
+        <div id="form_set">
+            {{ formset.management_form }}
+            {{ formset.non_form_errors }}
+            {% if form_invalid %}
+            Invalid Input
+            {% endif %}
+            {% for form in formset %}
+            {{ form.id }}
+            <div>
+                {{ form.text.label_tag }}
+                {{ form.text }}
+                <input type="submit" class="button" value="Delete" name="'btn_delete-{{ form.instance.id }}'"/>
+                {% endfor %}
+            </div>
+
+            <div>
+
+                <input type="submit" value="Save" class="submit"/>
+            </div>
+            <div id="empty_form" style="display:none">
+                {{ formset.empty_form }}
+            </div>
+
+        </div>
+    </form>
+    <input type="button" value="Add More" id="add_more">
+
+</div>
+<form action="." method="get">
+    {% csrf_token %}
+    <input type="submit" value="Cancel">
+</form>
+
+
+<script>
+    $('#add_more').click(function() {
+        var form_idx = $('#id_form-TOTAL_FORMS').val();
+        $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
+        $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
+    });
+</script>
+{% endblock %}
+
