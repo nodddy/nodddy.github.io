@@ -1,1 +1,22 @@
-index Seite
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Validation Redirect</title>
+</head>
+<body>
+  <form action="/home" method="get">
+    <label for="code">Enter validation text:</label><br><br>
+    <input
+      type="text"
+      id="code"
+      name="code"
+      required
+      pattern="^jedi game$"
+      title="You must enter exactly: jedi game"
+    >
+    <br><br>
+    <button type="submit">Submit</button>
+  </form>
+</body>
+</html>
